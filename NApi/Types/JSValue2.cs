@@ -1,18 +1,36 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
+using static NApi.Types.JsFunction;
 
 namespace NApi.Types
 {
+  public ref struct JSCallbackInfo {
+    internal JsScope Scope { get; }
+
+    internal IntPtr CallbackInfo { get; }
+
+    public JSCallbackInfo(JsScope scope, IntPtr callbackInfo)
+    {
+      Scope = scope;
+      CallbackInfo = callbackInfo;
+    }
+  }
+
+  public delegate JSValue JSCallback(JSCallbackInfo info);
+
   // New class for JSValue
   public class JSValue
   {
-    internal IntPtr ValuePtr { get; }
-
     internal JsScope Scope { get; }
 
-    protected JSValue(IntPtr valuePtr, JsScope scope)
+    internal IntPtr ValuePtr { get; }
+
+    protected JSValue(JsScope scope, IntPtr valuePtr)
     {
-      ValuePtr = valuePtr;
       Scope = scope;
+      ValuePtr = valuePtr;
     }
 
     private static JsScope GetScope()
@@ -31,7 +49,7 @@ namespace NApi.Types
       {
         creator(scope.Env.EnvPtr, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
       }
-      return new JSValue(valuePtr, scope);
+      return new JSValue(scope, valuePtr);
     }
 
     public static JSValue GetUndefined()
@@ -142,6 +160,57 @@ namespace NApi.Types
     {
       return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
         NApi.ApiProvider.JsNativeApi.napi_create_symbol(env, CreateStringUtf16(description).ValuePtr, valuePtr));
+    }
+
+    public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, delegate *unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> callback, IntPtr data)
+    {
+        return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+          NApi.ApiProvider.JsNativeApi.napi_create_function(env, utf8Name.Pin().Pointer, (UIntPtr)utf8Name.Length, callback, data, valuePtr));
+    }
+
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static unsafe IntPtr NativeCallback(IntPtr env, IntPtr callbackInfo)
+    {
+      try
+      {
+        using (var scope = new JsScope(new JsEnv(env)))
+        {
+          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
+
+          IntPtr data;
+          NApi.ApiProvider.JsNativeApi.napi_get_cb_info(scope.Env.EnvPtr, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
+          JSCallback cb = (JSCallback)GCHandle.FromIntPtr(data).Target!;
+          JSValue result = cb(cbInfo);
+          return result.ValuePtr;
+        }
+      }
+      catch (System.Exception e)
+      {
+        //TODO: record as JS error
+        Console.Error.WriteLine(e);
+        throw;
+      }
+    }
+
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static unsafe void FinalizeCallback(IntPtr env, IntPtr data, IntPtr hint)
+    {
+      GCHandle callbackHandle = GCHandle.FromIntPtr(data);
+      callbackHandle.Free();
+    }
+
+    public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, JSCallback callback)
+    {
+      GCHandle callbackHandle = GCHandle.Alloc(callback);
+      JSValue func = CreateFunction(utf8Name, &NativeCallback, (IntPtr)callbackHandle);
+      NApi.ApiProvider.JsNativeApi.napi_add_finalizer(
+        func.Scope.Env.EnvPtr, func.ValuePtr, (IntPtr)callbackHandle, &FinalizeCallback, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(func.Scope);
+      return func;
+    }
+
+    public static unsafe JSValue CreateFunction(string name, JSCallback callback)
+    {
+      return CreateFunction(Encoding.Default.GetBytes(name), callback);
     }
   }
 }

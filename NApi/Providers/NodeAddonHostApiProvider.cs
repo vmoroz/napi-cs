@@ -221,7 +221,7 @@ namespace NApi.Providers
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_function", CallingConvention = CallingConvention.Cdecl)]
                 internal static extern napi_status napi_create_function(IntPtr env,
-                    [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name, ulong length, IntPtr cb, IntPtr data, IntPtr result);
+                    void* utf8name, UIntPtr length, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> cb, IntPtr data, IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_error", CallingConvention = CallingConvention.Cdecl)]
@@ -406,7 +406,7 @@ namespace NApi.Providers
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_get_cb_info", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_get_cb_info(IntPtr env, IntPtr cbinfo, ulong* argc,
+                internal static extern napi_status napi_get_cb_info(IntPtr env, IntPtr cbinfo, UIntPtr* argc,
                     IntPtr argv, IntPtr this_arg, IntPtr data);
 
                 [SuppressUnmanagedCodeSecurity,
@@ -618,7 +618,7 @@ namespace NApi.Providers
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_add_finalizer", CallingConvention = CallingConvention.Cdecl)]
                 internal static extern napi_status napi_add_finalizer(IntPtr env, IntPtr js_object,
-                    IntPtr native_object, IntPtr finalize_cb, IntPtr finalize_hint, IntPtr result);
+                    IntPtr native_object, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb, IntPtr finalize_hint, IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_bigint_int64", CallingConvention = CallingConvention.Cdecl)]

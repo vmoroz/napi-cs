@@ -72,7 +72,8 @@ namespace NApi
 
             public napi_create_symbol_delegate napi_create_symbol { get; }
 
-            delegate napi_status napi_create_function_delegate(IntPtr env, string utf8name, ulong length, IntPtr cb, IntPtr data, IntPtr result);
+            delegate napi_status napi_create_function_delegate(IntPtr env,
+              void* utf8name, UIntPtr length, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> cb, IntPtr data, IntPtr result);
 
             public napi_create_function_delegate napi_create_function { get; }
 
@@ -224,7 +225,7 @@ namespace NApi
 
             public napi_instanceof_delegate napi_instanceof { get; }
 
-            delegate napi_status napi_get_cb_info_delegate(IntPtr env, IntPtr cbinfo, ulong* argc, IntPtr argv, IntPtr this_arg, IntPtr data);
+            delegate napi_status napi_get_cb_info_delegate(IntPtr env, IntPtr cbinfo, UIntPtr* argc, IntPtr argv, IntPtr this_arg, IntPtr data);
 
             public napi_get_cb_info_delegate napi_get_cb_info { get; }
 
@@ -404,7 +405,8 @@ namespace NApi
 
             public napi_get_date_value_delegate napi_get_date_value { get; }
 
-            delegate napi_status napi_add_finalizer_delegate(IntPtr env, IntPtr js_object, IntPtr native_object, IntPtr finalize_cb, IntPtr finalize_hint, IntPtr result);
+            delegate napi_status napi_add_finalizer_delegate(IntPtr env, IntPtr js_object, IntPtr native_object,
+              delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb, IntPtr finalize_hint, IntPtr result);
 
             public napi_add_finalizer_delegate napi_add_finalizer { get; }
 

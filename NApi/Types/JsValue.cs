@@ -50,26 +50,26 @@ namespace NApi.Types
 
     public void AttachGCHandle(GCHandle handle)
     {
-      try
-      {
-        var handlePtr = GCHandle.ToIntPtr(handle);
+      //try
+      //{
+      //  var handlePtr = GCHandle.ToIntPtr(handle);
 
-        if (NApiFinalizeCallbackHandle == null || NApiFinalizeCallbackPtr == null)
-        {
-          var cb = (napi_finalize)NApiFinalize;
-          NApiFinalizeCallbackHandle = GCHandle.Alloc(cb);
-          NApiFinalizeCallbackPtr = Marshal.GetFunctionPointerForDelegate(cb);
-        }
+      //  if (NApiFinalizeCallbackHandle == null || NApiFinalizeCallbackPtr == null)
+      //  {
+      //    var cb = (napi_finalize)NApiFinalize;
+      //    NApiFinalizeCallbackHandle = GCHandle.Alloc(cb);
+      //    NApiFinalizeCallbackPtr = Marshal.GetFunctionPointerForDelegate(cb);
+      //  }
 
-        NApi.ApiProvider.JsNativeApi.napi_add_finalizer(Scope.Env.EnvPtr, ValuePtr, handlePtr, NApiFinalizeCallbackPtr.Value, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(Scope);
-      }
-      catch
-      {
-        handle.Free();
-        throw;
-      }
+      //  NApi.ApiProvider.JsNativeApi.napi_add_finalizer(Scope.Env.EnvPtr, ValuePtr, handlePtr, NApiFinalizeCallbackPtr.Value, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(Scope);
+      //}
+      //catch
+      //{
+      //  handle.Free();
+      //  throw;
+      //}
 
-      ManagedGCHandles.Add(handle);
+      //ManagedGCHandles.Add(handle);
     }
 
     private delegate void napi_finalize(IntPtr envPtr, IntPtr finalizeDataPtr, IntPtr finalizeHintPtr);

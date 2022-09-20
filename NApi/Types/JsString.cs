@@ -12,7 +12,8 @@ namespace NApi.Types
     public static unsafe JsString Create(JsScope scope, string value)
     {
       IntPtr valuePtr = new IntPtr();
-      NApi.ApiProvider.JsNativeApi.napi_create_string_utf8(scope.Env.EnvPtr, value.AsMemory().Pin().Pointer, (UIntPtr)value.Length, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+      byte[] utf8Str = Encoding.Default.GetBytes(value);
+      NApi.ApiProvider.JsNativeApi.napi_create_string_utf8(scope.Env.EnvPtr, utf8Str.AsMemory().Pin().Pointer, (UIntPtr)utf8Str.Length, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
       return new JsString(scope, valuePtr);
     }
 
