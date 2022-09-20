@@ -20,15 +20,32 @@ namespace NApi.Types
       Scope = scope;
     }
 
-    public static JSValue GetUndefined()
+    private static JsScope GetScope()
     {
       JsScope? scope = JsScope.Current;
       if (scope == null)
         throw new InvalidOperationException("Scope is null");
+      return scope;
+    }
+
+    public static JSValue GetUndefined()
+    {
+      JsScope scope = GetScope();
       IntPtr valuePtr;
       unsafe
       {
-        NApi.ApiProvider.JsNativeApi.napi_get_undefined(scope.Env.EnvPtr, &valuePtr).ThrowIfFailed(scope);
+        NApi.ApiProvider.JsNativeApi.napi_get_undefined(scope.Env.EnvPtr, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+      }
+      return new JSValue(valuePtr, scope);
+    }
+
+    public static JSValue GetNull()
+    {
+      JsScope scope = GetScope();
+      IntPtr valuePtr;
+      unsafe
+      {
+        NApi.ApiProvider.JsNativeApi.napi_get_null(scope.Env.EnvPtr, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
       }
       return new JSValue(valuePtr, scope);
     }
