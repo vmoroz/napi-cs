@@ -264,5 +264,23 @@ namespace NApi.Types
     {
       return NApi.ApiProvider.JsNativeApi.napi_get_value_bool(Scope.Env.EnvPtr, ValuePtr, out value) == napi_status.napi_ok;
     }
+
+    public unsafe bool TryGetValue(out string value)
+    {
+      // TODO: should we check value type first?
+      nuint length;
+      if (NApi.ApiProvider.JsNativeApi.napi_get_value_string_utf16(Scope.Env.EnvPtr, ValuePtr, null, 0, &length) != napi_status.napi_ok) {
+        value = string.Empty;
+        return false;
+      }
+
+      char[] buf = new char[length + 1];
+      fixed (char* bufStart = &buf[0])
+      {
+        NApi.ApiProvider.JsNativeApi.napi_get_value_string_utf16(Scope.Env.EnvPtr, ValuePtr, bufStart, (nuint)buf.Length, null).ThrowIfFailed(Scope);
+        value = new string(buf);
+        return true;
+      }
+    }
   }
 }

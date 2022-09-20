@@ -151,6 +151,7 @@ namespace NApi.Providers
             public INApiProvider.IJsNativeApiProvider.napi_object_freeze_delegate napi_object_freeze => Native.napi_object_freeze;
             public INApiProvider.IJsNativeApiProvider.napi_object_seal_delegate napi_object_seal => Native.napi_object_seal;
 
+            [SuppressUnmanagedCodeSecurity]
             private static class Native
             {
                 [SuppressUnmanagedCodeSecurity,
@@ -263,19 +264,19 @@ namespace NApi.Providers
                 internal static extern napi_status napi_get_value_bool(IntPtr env, IntPtr value, [MarshalAs(UnmanagedType.U1)] out bool result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_string_latin1", CallingConvention = CallingConvention.Cdecl)]
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_string_latin1), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
                 internal static extern napi_status napi_get_value_string_latin1(IntPtr env, IntPtr value,
-                    sbyte* buf, ulong bufsize, ulong* result);
+                    sbyte* buf, nuint bufsize, nuint* result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_string_utf8", CallingConvention = CallingConvention.Cdecl)]
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_string_utf8), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
                 internal static extern napi_status napi_get_value_string_utf8(IntPtr env, IntPtr value,
-                    sbyte* buf, ulong bufsize, ulong* result);
+                    sbyte* buf, nuint bufsize, nuint* result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_string_utf16", CallingConvention = CallingConvention.Cdecl)]
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_string_utf16), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
                 internal static extern napi_status napi_get_value_string_utf16(IntPtr env, IntPtr value,
-                    char* buf, ulong bufsize, ulong* result);
+                    char* buf, nuint bufsize, nuint* result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_coerce_to_bool", CallingConvention = CallingConvention.Cdecl)]

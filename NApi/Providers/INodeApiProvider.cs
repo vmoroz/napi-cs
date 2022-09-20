@@ -113,15 +113,15 @@ namespace NApi
 
             public napi_get_value_bool_delegate napi_get_value_bool { get; }
 
-            delegate napi_status napi_get_value_string_latin1_delegate(IntPtr env, IntPtr value, sbyte* buf, ulong bufsize, ulong* result);
+            delegate napi_status napi_get_value_string_latin1_delegate(IntPtr env, IntPtr value, sbyte* buf, nuint bufsize, nuint* result);
 
             public napi_get_value_string_latin1_delegate napi_get_value_string_latin1 { get; }
 
-            delegate napi_status napi_get_value_string_utf8_delegate(IntPtr env, IntPtr value, sbyte* buf, ulong bufsize, ulong* result);
+            delegate napi_status napi_get_value_string_utf8_delegate(IntPtr env, IntPtr value, sbyte* buf, nuint bufsize, nuint* result);
 
             public napi_get_value_string_utf8_delegate napi_get_value_string_utf8 { get; }
 
-            delegate napi_status napi_get_value_string_utf16_delegate(IntPtr env, IntPtr value, char* buf, ulong bufsize, ulong* result);
+            delegate napi_status napi_get_value_string_utf16_delegate(IntPtr env, IntPtr value, char* buf, nuint bufsize, nuint* result);
 
             public napi_get_value_string_utf16_delegate napi_get_value_string_utf16 { get; }
 
