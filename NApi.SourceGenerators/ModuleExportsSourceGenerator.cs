@@ -18,7 +18,6 @@ namespace NApi.SourceGenerators
             StringBuilder source = new(@"
 using System;
 using System.Runtime.InteropServices;
-using NApi.Providers;
 using NApi.Types;
 
 namespace NApi
@@ -32,8 +31,7 @@ namespace NApi
         {
             if (!_initialized)
             {
-                NodeAddonHostApiProvider.SetupDllImportResolver(typeof(NApi).Assembly);
-                NApi.ApiProvider = new NodeAddonHostApiProvider();
+                NodeApi.SetupDllImportResolver(typeof(NodeApi).Assembly);
                 _initialized = true;
             }
 

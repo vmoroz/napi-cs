@@ -1,4 +1,5 @@
 ﻿using System;
+using static NApi.NodeApi;
 
 namespace NApi.Types
 {
@@ -11,14 +12,14 @@ namespace NApi.Types
     public static unsafe JsNumber Create(JsScope scope, double value)
     {
       IntPtr valuePtr = new IntPtr();
-      NApi.ApiProvider.JsNativeApi.napi_create_double(scope.Env.EnvPtr, value, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+      napi_create_double(scope.Env.EnvPtr, value, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
       return new JsNumber(scope, valuePtr);
     }
 
     public double ToDouble()
     {
       double result;
-      NApi.ApiProvider.JsNativeApi.napi_get_value_double(Scope.Env.EnvPtr, ValuePtr, out result).ThrowIfFailed(Scope);
+      napi_get_value_double(Scope.Env.EnvPtr, ValuePtr, out result).ThrowIfFailed(Scope);
       return result;
     }
   }

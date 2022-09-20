@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using static NApi.NodeApi;
 
 namespace NApi.Types
 {
@@ -44,7 +45,7 @@ namespace NApi.Types
     private static unsafe JSValueType Typeof(JsScope scope, IntPtr valuePtr)
     {
       JSValueType valueType;
-      NApi.ApiProvider.JsNativeApi.napi_typeof(scope.Env.EnvPtr, valuePtr, &valueType).ThrowIfFailed(scope);
+      napi_typeof(scope.Env.EnvPtr, valuePtr, &valueType).ThrowIfFailed(scope);
       return valueType;
     }
 
