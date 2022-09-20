@@ -181,6 +181,7 @@ namespace NApi.Types
           NApi.ApiProvider.JsNativeApi.napi_get_cb_info(scope.Env.EnvPtr, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
           JSCallback cb = (JSCallback)GCHandle.FromIntPtr(data).Target!;
           JSValue result = cb(cbInfo);
+          // TODO: implement escapable scope
           return result.ValuePtr;
         }
       }
