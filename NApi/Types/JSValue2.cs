@@ -209,9 +209,27 @@ namespace NApi.Types
       return func;
     }
 
-    public static unsafe JSValue CreateFunction(string name, JSCallback callback)
+    public static JSValue CreateFunction(string name, JSCallback callback)
     {
       return CreateFunction(Encoding.Default.GetBytes(name), callback);
+    }
+
+    public static JSValue CreateError(JSValue code, JSValue message)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_error(env, code.ValuePtr, message.ValuePtr, valuePtr));
+    }
+
+    public static JSValue CreateTypeError(JSValue code, JSValue message)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_type_error(env, code.ValuePtr, message.ValuePtr, valuePtr));
+    }
+
+    public static JSValue CreateRangeError(JSValue code, JSValue message)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_range_error(env, code.ValuePtr, message.ValuePtr, valuePtr));
     }
   }
 }
