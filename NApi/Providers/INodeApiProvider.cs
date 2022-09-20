@@ -12,7 +12,7 @@ namespace NApi
 
             public napi_get_last_error_info_delegate napi_get_last_error_info { get; }
 
-            delegate napi_status napi_get_undefined_delegate(IntPtr env, IntPtr result);
+            delegate napi_status napi_get_undefined_delegate(IntPtr env, IntPtr *result);
 
             public napi_get_undefined_delegate napi_get_undefined { get; }
 

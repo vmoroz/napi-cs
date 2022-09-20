@@ -159,7 +159,7 @@ namespace NApi.Providers
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_get_undefined", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_get_undefined(IntPtr env, IntPtr result);
+                internal static extern napi_status napi_get_undefined(IntPtr env, IntPtr* result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_get_null", CallingConvention = CallingConvention.Cdecl)]
