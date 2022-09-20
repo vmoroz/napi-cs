@@ -28,7 +28,7 @@ namespace NApi.Types
 
     internal IntPtr ValuePtr { get; }
 
-    protected JSValue(JsScope scope, IntPtr valuePtr)
+    public JSValue(JsScope scope, IntPtr valuePtr)
     {
       Scope = scope;
       ValuePtr = valuePtr;
@@ -269,7 +269,8 @@ namespace NApi.Types
       // TODO: add check that the object is still alive
       // TODO: should we check value type first?
       nuint length;
-      if (napi_get_value_string_utf16(Scope.Env.EnvPtr, ValuePtr, null, 0, &length) != napi_status.napi_ok) {
+      if (napi_get_value_string_utf16(Scope.Env.EnvPtr, ValuePtr, null, 0, &length) != napi_status.napi_ok)
+      {
         value = string.Empty;
         return false;
       }
@@ -282,5 +283,20 @@ namespace NApi.Types
         return true;
       }
     }
+
+    //TODO: implement in future
+    //public static explicit operator double(JSValue value)
+    //{
+    //  double result;
+    //  return value.TryGetValue(out result) ? result : 0.0;
+    //}
+
+    //public static implicit operator JSValue(double value) => CreateNumber(value);
+
+    //public JSValue this[string name]
+    //{
+    //  get { return GetProperty(name); }
+    //  set { SetProperty(name, value); }
+    //}
   }
 }

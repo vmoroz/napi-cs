@@ -7,9 +7,9 @@ namespace NApi.Types
 {
   public abstract class JsValue
   {
-    internal JsScope Scope { get; }
+    public JsScope Scope { get; }
 
-    internal IntPtr ValuePtr { get; }
+    public IntPtr ValuePtr { get; }
 
     private HashSet<GCHandle> ManagedGCHandles = new();
 

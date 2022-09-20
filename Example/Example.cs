@@ -22,6 +22,20 @@ namespace Example
       //    return JsString.Create(scope, arg1 + arg2);
       //  });
       //}));
+
+      //exports["plus"] = (thisArg, args) => JSValue.CreateNumber(args[0].ToDouble() + args[1].ToDouble());
+      //JSValue ex = new JSValue(exports.Scope, exports.ValuePtr);
+      //ex["plus"] = 42;// (args) => (double)args[0] + (double)args[1];
+      //exports["helloPlusWorld"] = (args) => (string)args[0] + " world";
+      //exports["add"] = (info) =>
+      //{
+      //  string arg1 = args[0];
+      //  return JSValue.CreateFunction("hoc", (args) =>
+      //  {
+      //    string arg2 = args[0];
+      //    return arg1 + arg2;
+      //  });
+      //};
     }
   }
 }
