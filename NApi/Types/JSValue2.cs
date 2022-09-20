@@ -239,5 +239,30 @@ namespace NApi.Types
       NApi.ApiProvider.JsNativeApi.napi_typeof(Scope.Env.EnvPtr, ValuePtr, &result).ThrowIfFailed(Scope);
       return result;
     }
+
+    public bool TryGetValue(out double value)
+    {
+      return NApi.ApiProvider.JsNativeApi.napi_get_value_double(Scope.Env.EnvPtr, ValuePtr, out value) == napi_status.napi_ok;
+    }
+
+    public bool TryGetValue(out int value)
+    {
+      return NApi.ApiProvider.JsNativeApi.napi_get_value_int32(Scope.Env.EnvPtr, ValuePtr, out value) == napi_status.napi_ok;
+    }
+
+    public bool TryGetValue(out uint value)
+    {
+      return NApi.ApiProvider.JsNativeApi.napi_get_value_uint32(Scope.Env.EnvPtr, ValuePtr, out value) == napi_status.napi_ok;
+    }
+
+    public bool TryGetValue(out long value)
+    {
+      return NApi.ApiProvider.JsNativeApi.napi_get_value_int64(Scope.Env.EnvPtr, ValuePtr, out value) == napi_status.napi_ok;
+    }
+
+    public bool TryGetValue(out bool value)
+    {
+      return NApi.ApiProvider.JsNativeApi.napi_get_value_bool(Scope.Env.EnvPtr, ValuePtr, out value) == napi_status.napi_ok;
+    }
   }
 }

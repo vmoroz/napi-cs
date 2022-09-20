@@ -239,31 +239,28 @@ namespace NApi.Providers
                     IntPtr msg, IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_typeof", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_typeof(IntPtr env, IntPtr value,
-                    JSValueType* result);
+                 DllImport("NodeJS", EntryPoint = nameof(napi_typeof), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+                internal static extern napi_status napi_typeof(IntPtr env, IntPtr value, JSValueType* result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_double", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_get_value_double(IntPtr env, IntPtr value,
-                    double* result);
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_double), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+                internal static extern napi_status napi_get_value_double(IntPtr env, IntPtr value, out double result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_int32", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_get_value_int32(IntPtr env, IntPtr value, int* result);
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_int32), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+                internal static extern napi_status napi_get_value_int32(IntPtr env, IntPtr value, out int result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_uint32", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status
-                    napi_get_value_uint32(IntPtr env, IntPtr value, uint* result);
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_uint32), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+                internal static extern napi_status napi_get_value_uint32(IntPtr env, IntPtr value, out uint result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_int64", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_get_value_int64(IntPtr env, IntPtr value, long* result);
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_int64), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+                internal static extern napi_status napi_get_value_int64(IntPtr env, IntPtr value, out long result);
 
                 [SuppressUnmanagedCodeSecurity,
-                 DllImport("NodeJS", EntryPoint = "napi_get_value_bool", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_get_value_bool(IntPtr env, IntPtr value, bool* result);
+                 DllImport("NodeJS", EntryPoint = nameof(napi_get_value_bool), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+                internal static extern napi_status napi_get_value_bool(IntPtr env, IntPtr value, [MarshalAs(UnmanagedType.U1)] out bool result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_get_value_string_latin1", CallingConvention = CallingConvention.Cdecl)]

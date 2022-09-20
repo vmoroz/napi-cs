@@ -15,10 +15,10 @@ namespace NApi.Types
       return new JsNumber(scope, valuePtr);
     }
 
-    public unsafe double ToDouble()
+    public double ToDouble()
     {
       double result;
-      NApi.ApiProvider.JsNativeApi.napi_get_value_double(Scope.Env.EnvPtr, ValuePtr, &result).ThrowIfFailed(Scope);
+      NApi.ApiProvider.JsNativeApi.napi_get_value_double(Scope.Env.EnvPtr, ValuePtr, out result).ThrowIfFailed(Scope);
       return result;
     }
   }

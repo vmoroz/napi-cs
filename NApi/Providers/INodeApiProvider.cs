@@ -93,23 +93,23 @@ namespace NApi
 
             public napi_typeof_delegate napi_typeof { get; }
 
-            delegate napi_status napi_get_value_double_delegate(IntPtr env, IntPtr value, double* result);
+            delegate napi_status napi_get_value_double_delegate(IntPtr env, IntPtr value, out double result);
 
             public napi_get_value_double_delegate napi_get_value_double { get; }
 
-            delegate napi_status napi_get_value_int32_delegate(IntPtr env, IntPtr value, int* result);
+            delegate napi_status napi_get_value_int32_delegate(IntPtr env, IntPtr value, out int result);
 
             public napi_get_value_int32_delegate napi_get_value_int32 { get; }
 
-            delegate napi_status napi_get_value_uint32_delegate(IntPtr env, IntPtr value, uint* result);
+            delegate napi_status napi_get_value_uint32_delegate(IntPtr env, IntPtr value, out uint result);
 
             public napi_get_value_uint32_delegate napi_get_value_uint32 { get; }
 
-            delegate napi_status napi_get_value_int64_delegate(IntPtr env, IntPtr value, long* result);
+            delegate napi_status napi_get_value_int64_delegate(IntPtr env, IntPtr value, out long result);
 
             public napi_get_value_int64_delegate napi_get_value_int64 { get; }
 
-            delegate napi_status napi_get_value_bool_delegate(IntPtr env, IntPtr value, bool* result);
+            delegate napi_status napi_get_value_bool_delegate(IntPtr env, IntPtr value, out bool result);
 
             public napi_get_value_bool_delegate napi_get_value_bool { get; }
 
