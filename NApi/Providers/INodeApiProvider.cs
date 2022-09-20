@@ -89,7 +89,7 @@ namespace NApi
 
             public napi_create_range_error_delegate napi_create_range_error { get; }
 
-            delegate napi_status napi_typeof_delegate(IntPtr env, IntPtr value, napi_valuetype* result);
+            delegate napi_status napi_typeof_delegate(IntPtr env, IntPtr value, JSValueType* result);
 
             public napi_typeof_delegate napi_typeof { get; }
 

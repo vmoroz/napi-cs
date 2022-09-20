@@ -6,7 +6,8 @@ using static NApi.Types.JsFunction;
 
 namespace NApi.Types
 {
-  public ref struct JSCallbackInfo {
+  public ref struct JSCallbackInfo
+  {
     internal JsScope Scope { get; }
 
     internal IntPtr CallbackInfo { get; }
@@ -152,8 +153,8 @@ namespace NApi.Types
 
     public static JSValue CreateSymbol(JSValue description)
     {
-        return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
-          NApi.ApiProvider.JsNativeApi.napi_create_symbol(env, description.ValuePtr, valuePtr));
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_symbol(env, description.ValuePtr, valuePtr));
     }
 
     public static JSValue CreateSymbol(string description)
@@ -162,10 +163,10 @@ namespace NApi.Types
         NApi.ApiProvider.JsNativeApi.napi_create_symbol(env, CreateStringUtf16(description).ValuePtr, valuePtr));
     }
 
-    public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, delegate *unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> callback, IntPtr data)
+    public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> callback, IntPtr data)
     {
-        return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
-          NApi.ApiProvider.JsNativeApi.napi_create_function(env, utf8Name.Pin().Pointer, (UIntPtr)utf8Name.Length, callback, data, valuePtr));
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_function(env, utf8Name.Pin().Pointer, (UIntPtr)utf8Name.Length, callback, data, valuePtr));
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
@@ -230,6 +231,13 @@ namespace NApi.Types
     {
       return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
         NApi.ApiProvider.JsNativeApi.napi_create_range_error(env, code.ValuePtr, message.ValuePtr, valuePtr));
+    }
+
+    public unsafe JSValueType TypeOf()
+    {
+      JSValueType result;
+      NApi.ApiProvider.JsNativeApi.napi_typeof(Scope.Env.EnvPtr, ValuePtr, &result).ThrowIfFailed(Scope);
+      return result;
     }
   }
 }

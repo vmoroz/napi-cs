@@ -13,18 +13,18 @@ namespace NApi
         napi_default_jsproperty = 7
     }
 
-    public enum napi_valuetype
+    public enum JSValueType
     {
-        napi_undefined = 0,
-        napi_null = 1,
-        napi_boolean = 2,
-        napi_number = 3,
-        napi_string = 4,
-        napi_symbol = 5,
-        napi_object = 6,
-        napi_function = 7,
-        napi_external = 8,
-        napi_bigint = 9
+        Undefined,
+        Null,
+        Boolean,
+        Number,
+        String,
+        Symbol,
+        Object,
+        Function,
+        External,
+        BigInt,
     }
 
     public enum napi_typedarray_type

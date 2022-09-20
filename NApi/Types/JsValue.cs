@@ -27,23 +27,23 @@ namespace NApi.Types
       var valueType = Typeof(scope, valuePtr);
       return valueType switch
       {
-        napi_valuetype.napi_number => new JsNumber(scope, valuePtr),
-        napi_valuetype.napi_undefined => throw new NotImplementedException(),
-        napi_valuetype.napi_null => throw new NotImplementedException(),
-        napi_valuetype.napi_boolean => throw new NotImplementedException(),
-        napi_valuetype.napi_string => new JsString(scope, valuePtr),
-        napi_valuetype.napi_symbol => throw new NotImplementedException(),
-        napi_valuetype.napi_object => new JsObject(scope, valuePtr),
-        napi_valuetype.napi_function => new JsFunction(scope, valuePtr),
-        napi_valuetype.napi_external => throw new NotImplementedException(),
-        napi_valuetype.napi_bigint => throw new NotImplementedException(),
+        JSValueType.Number => new JsNumber(scope, valuePtr),
+        JSValueType.Undefined => throw new NotImplementedException(),
+        JSValueType.Null => throw new NotImplementedException(),
+        JSValueType.Boolean => throw new NotImplementedException(),
+        JSValueType.String => new JsString(scope, valuePtr),
+        JSValueType.Symbol => throw new NotImplementedException(),
+        JSValueType.Object => new JsObject(scope, valuePtr),
+        JSValueType.Function => new JsFunction(scope, valuePtr),
+        JSValueType.External => throw new NotImplementedException(),
+        JSValueType.BigInt => throw new NotImplementedException(),
         _ => throw new ArgumentOutOfRangeException()
       };
     }
 
-    private static unsafe napi_valuetype Typeof(JsScope scope, IntPtr valuePtr)
+    private static unsafe JSValueType Typeof(JsScope scope, IntPtr valuePtr)
     {
-      napi_valuetype valueType;
+      JSValueType valueType;
       NApi.ApiProvider.JsNativeApi.napi_typeof(scope.Env.EnvPtr, valuePtr, &valueType).ThrowIfFailed(scope);
       return valueType;
     }

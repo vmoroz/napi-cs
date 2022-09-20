@@ -241,7 +241,7 @@ namespace NApi.Providers
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_typeof", CallingConvention = CallingConvention.Cdecl)]
                 internal static extern napi_status napi_typeof(IntPtr env, IntPtr value,
-                    napi_valuetype* result);
+                    JSValueType* result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_get_value_double", CallingConvention = CallingConvention.Cdecl)]
