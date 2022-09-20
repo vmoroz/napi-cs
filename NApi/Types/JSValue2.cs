@@ -131,5 +131,17 @@ namespace NApi.Types
     {
       return CreateStringUtf16(value.AsMemory());
     }
+
+    public static JSValue CreateSymbol(JSValue description)
+    {
+        return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+          NApi.ApiProvider.JsNativeApi.napi_create_symbol(env, description.ValuePtr, valuePtr));
+    }
+
+    public static JSValue CreateSymbol(string description)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_symbol(env, CreateStringUtf16(description).ValuePtr, valuePtr));
+    }
   }
 }
