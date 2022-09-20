@@ -204,23 +204,19 @@ namespace NApi.Providers
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_string_latin1", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_create_string_latin1(IntPtr env,
-                    [MarshalAs(UnmanagedType.LPUTF8Str)] string str, ulong length, IntPtr result);
+                internal static extern napi_status napi_create_string_latin1(IntPtr env, void* str, UIntPtr length, IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_string_utf8", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_create_string_utf8(IntPtr env,
-                    [MarshalAs(UnmanagedType.LPUTF8Str)] string str, ulong length, IntPtr result);
+                internal static extern napi_status napi_create_string_utf8(IntPtr env, void* str, UIntPtr length, IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_string_utf16", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_create_string_utf16(IntPtr env,
-                    [MarshalAs(UnmanagedType.LPWStr)] string str, ulong length, IntPtr result);
+                internal static extern napi_status napi_create_string_utf16(IntPtr env, void* str, UIntPtr length, IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_symbol", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_create_symbol(IntPtr env, IntPtr description,
-                    IntPtr result);
+                internal static extern napi_status napi_create_symbol(IntPtr env, IntPtr description, IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_function", CallingConvention = CallingConvention.Cdecl)]

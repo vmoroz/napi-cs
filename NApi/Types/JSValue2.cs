@@ -99,5 +99,37 @@ namespace NApi.Types
       return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
         NApi.ApiProvider.JsNativeApi.napi_create_int64(env, value, valuePtr));
     }
+
+    public static JSValue CreateStringLatin1(ReadOnlyMemory<byte> value)
+    {
+      unsafe
+      {
+        return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+          NApi.ApiProvider.JsNativeApi.napi_create_string_latin1(env, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
+      }
+    }
+
+    public static JSValue CreateStringUtf8(ReadOnlyMemory<byte> value)
+    {
+      unsafe
+      {
+        return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+          NApi.ApiProvider.JsNativeApi.napi_create_string_utf8(env, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
+      }
+    }
+
+    public static JSValue CreateStringUtf16(ReadOnlyMemory<char> value)
+    {
+      unsafe
+      {
+        return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+          NApi.ApiProvider.JsNativeApi.napi_create_string_utf16(env, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
+      }
+    }
+
+    public static JSValue CreateStringUtf16(string value)
+    {
+      return CreateStringUtf16(value.AsMemory());
+    }
   }
 }

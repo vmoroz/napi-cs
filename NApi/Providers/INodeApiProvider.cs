@@ -56,15 +56,15 @@ namespace NApi
 
             public napi_create_int64_delegate napi_create_int64 { get; }
 
-            delegate napi_status napi_create_string_latin1_delegate(IntPtr env, string str, ulong length, IntPtr result);
+            delegate napi_status napi_create_string_latin1_delegate(IntPtr env, void* str, UIntPtr length, IntPtr result);
 
             public napi_create_string_latin1_delegate napi_create_string_latin1 { get; }
 
-            delegate napi_status napi_create_string_utf8_delegate(IntPtr env, string str, ulong length, IntPtr result);
+            delegate napi_status napi_create_string_utf8_delegate(IntPtr env, void* str, UIntPtr length, IntPtr result);
 
             public napi_create_string_utf8_delegate napi_create_string_utf8 { get; }
 
-            delegate napi_status napi_create_string_utf16_delegate(IntPtr env, string str, ulong length, IntPtr result);
+            delegate napi_status napi_create_string_utf16_delegate(IntPtr env, void* str, UIntPtr length, IntPtr result);
 
             public napi_create_string_utf16_delegate napi_create_string_utf16 { get; }
 
