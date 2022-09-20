@@ -36,7 +36,7 @@ namespace NApi
 
             public napi_create_array_delegate napi_create_array { get; }
 
-            delegate napi_status napi_create_array_with_length_delegate(IntPtr env, ulong length, IntPtr result);
+            delegate napi_status napi_create_array_with_length_delegate(IntPtr env, UIntPtr length, IntPtr result);
 
             public napi_create_array_with_length_delegate napi_create_array_with_length { get; }
 

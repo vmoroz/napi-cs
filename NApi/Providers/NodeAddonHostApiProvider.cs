@@ -183,7 +183,7 @@ namespace NApi.Providers
 
                 [SuppressUnmanagedCodeSecurity,
                  DllImport("NodeJS", EntryPoint = "napi_create_array_with_length", CallingConvention = CallingConvention.Cdecl)]
-                internal static extern napi_status napi_create_array_with_length(IntPtr env, ulong length,
+                internal static extern napi_status napi_create_array_with_length(IntPtr env, UIntPtr length,
                     IntPtr result);
 
                 [SuppressUnmanagedCodeSecurity,

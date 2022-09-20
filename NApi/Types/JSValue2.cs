@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace NApi.Types
 {
@@ -28,26 +23,81 @@ namespace NApi.Types
       return scope;
     }
 
-    public static JSValue GetUndefined()
+    private static JSValue CreateJSValue(Func<IntPtr, IntPtr, napi_status> creator)
     {
       JsScope scope = GetScope();
       IntPtr valuePtr;
       unsafe
       {
-        NApi.ApiProvider.JsNativeApi.napi_get_undefined(scope.Env.EnvPtr, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+        creator(scope.Env.EnvPtr, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
       }
       return new JSValue(valuePtr, scope);
     }
 
+    public static JSValue GetUndefined()
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_get_undefined(env, valuePtr));
+    }
+
     public static JSValue GetNull()
     {
-      JsScope scope = GetScope();
-      IntPtr valuePtr;
-      unsafe
-      {
-        NApi.ApiProvider.JsNativeApi.napi_get_null(scope.Env.EnvPtr, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
-      }
-      return new JSValue(valuePtr, scope);
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_get_null(env, valuePtr));
+    }
+
+    public static JSValue GetGlobal()
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_get_global(env, valuePtr));
+    }
+
+    public static JSValue GetBoolean(bool value)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_get_boolean(env, value, valuePtr));
+    }
+
+    public static JSValue CreateObject()
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_object(env, valuePtr));
+    }
+
+    public static JSValue CreateArray()
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_array(env, valuePtr));
+    }
+
+    public static JSValue CreateArray(uint length)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_array_with_length(env, (UIntPtr)length, valuePtr));
+    }
+
+    public static JSValue CreateNumber(double value)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_double(env, value, valuePtr));
+    }
+
+    public static JSValue CreateNumber(int value)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_int32(env, value, valuePtr));
+    }
+
+    public static JSValue CreateNumber(uint value)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_uint32(env, value, valuePtr));
+    }
+
+    public static JSValue CreateNumber(long value)
+    {
+      return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
+        NApi.ApiProvider.JsNativeApi.napi_create_int64(env, value, valuePtr));
     }
   }
 }
