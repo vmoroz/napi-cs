@@ -169,7 +169,7 @@ namespace NApi.Types
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static unsafe IntPtr JSCallbackInvoke(IntPtr env, IntPtr callbackInfo)
+    private static unsafe IntPtr InvokeJSCallback(IntPtr env, IntPtr callbackInfo)
     {
       try
       {
@@ -194,7 +194,7 @@ namespace NApi.Types
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static unsafe void JSCallbackFinalizer(IntPtr env, IntPtr data, IntPtr hint)
+    private static unsafe void FinalizeJSCallback(IntPtr env, IntPtr data, IntPtr hint)
     {
       GCHandle callbackHandle = GCHandle.FromIntPtr(data);
       callbackHandle.Free();
@@ -203,9 +203,9 @@ namespace NApi.Types
     public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, JSCallback callback)
     {
       GCHandle callbackHandle = GCHandle.Alloc(callback);
-      JSValue func = CreateFunction(utf8Name, &JSCallbackInvoke, (IntPtr)callbackHandle);
+      JSValue func = CreateFunction(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle);
       NApi.ApiProvider.JsNativeApi.napi_add_finalizer(
-        func.Scope.Env.EnvPtr, func.ValuePtr, (IntPtr)callbackHandle, &JSCallbackFinalizer, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(func.Scope);
+        func.Scope.Env.EnvPtr, func.ValuePtr, (IntPtr)callbackHandle, &FinalizeJSCallback, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(func.Scope);
       return func;
     }
 
