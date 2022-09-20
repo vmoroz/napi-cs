@@ -212,7 +212,7 @@ namespace NApi.Types
 
     public static JSValue CreateFunction(string name, JSCallback callback)
     {
-      return CreateFunction(Encoding.Default.GetBytes(name), callback);
+      return CreateFunction(Encoding.UTF8.GetBytes(name), callback);
     }
 
     public static JSValue CreateError(JSValue code, JSValue message)
@@ -267,6 +267,7 @@ namespace NApi.Types
 
     public unsafe bool TryGetValue(out string value)
     {
+      // TODO: add check that the object is still alive
       // TODO: should we check value type first?
       nuint length;
       if (NApi.ApiProvider.JsNativeApi.napi_get_value_string_utf16(Scope.Env.EnvPtr, ValuePtr, null, 0, &length) != napi_status.napi_ok) {
