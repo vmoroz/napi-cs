@@ -327,5 +327,19 @@ namespace NApi.Types
       napi_coerce_to_string(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
       return result;
     }
+
+    public JSValue GetPrototype()
+    {
+      napi_value result;
+      napi_get_prototype(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public JSValue GetPropertyNames()
+    {
+      napi_value result;
+      napi_get_property_names(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      return result;
+    }
   }
 }
