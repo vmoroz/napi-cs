@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="7.0.0-rc.1.22426.10"/>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="7.0.0-alpha.1.21562.1"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsNApiRepo)' != 'true'">

@@ -28,7 +28,7 @@
           AfterTargets="PublishNodeAddon">
     <PropertyGroup>
         <JsEntryPoint>
-module.exports = require('./$([System.IO.Path]::GetRelativePath('$(OutputPath)', '$(NativeOutputPath)$(TargetName).node'))')
+module.exports = require(`./$([System.IO.Path]::GetRelativePath('$(OutputPath)', '$(NativeOutputPath)$(TargetName).node'))`)
         </JsEntryPoint>
       </PropertyGroup>
 
