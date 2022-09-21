@@ -341,5 +341,74 @@ namespace NApi.Types
       napi_get_property_names(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
       return result;
     }
+
+    public void SetProperty(JSValue key, JSValue value)
+    {
+      napi_set_property(Scope.Env, (napi_value)this, (napi_value)key, (napi_value)value).ThrowIfFailed(Scope);
+    }
+
+    public bool HasProperty(JSValue key)
+    {
+      napi_has_property(Scope.Env, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
+
+    public JSValue GetProperty(JSValue key)
+    {
+      napi_get_property(Scope.Env, (napi_value)this, (napi_value)key, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public bool DeleteProperty(JSValue key)
+    {
+      napi_delete_property(Scope.Env, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
+
+    public bool HasOwnProperty(JSValue key)
+    {
+      napi_has_own_property(Scope.Env, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
+
+    public void SetProperty(string name, JSValue value)
+    {
+      napi_set_named_property(Scope.Env, (napi_value)this, name, (napi_value)value).ThrowIfFailed(Scope);
+    }
+
+    public bool HasProperty(string name)
+    {
+      napi_has_named_property(Scope.Env, (napi_value)this, name, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
+
+    public JSValue GetProperty(string name)
+    {
+      napi_get_named_property(Scope.Env, (napi_value)this, name, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public void SetElement(int index, JSValue value)
+    {
+      napi_set_element(Scope.Env, (napi_value)this, (uint)index, (napi_value)value).ThrowIfFailed(Scope);
+    }
+
+    public bool HasElement(int index)
+    {
+      napi_has_element(Scope.Env, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
+
+    public JSValue GetElement(int index)
+    {
+      napi_get_element(Scope.Env, (napi_value)this, (uint)index, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public bool DeleteElement(int index)
+    {
+      napi_delete_element(Scope.Env, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
   }
 }

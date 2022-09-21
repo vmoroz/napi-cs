@@ -24,9 +24,8 @@ namespace NApi.Types
 
     public unsafe JsValue Get(JsValue key)
     {
-      IntPtr resultPtr = new IntPtr();
-      napi_get_property(Scope.Env, ValuePtr, key.ValuePtr, new IntPtr(&resultPtr)).ThrowIfFailed(Scope);
-      return JsValue.Create(Scope, resultPtr);
+      napi_get_property(Scope.Env, ValuePtr, key.ValuePtr, out napi_value result).ThrowIfFailed(Scope);
+      return JsValue.Create(Scope, result.Pointer);
     }
 
     public void Set(JsValue key, JsValue value)

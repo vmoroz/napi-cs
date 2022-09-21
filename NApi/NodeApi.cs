@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -14,6 +13,8 @@ namespace NApi
   public struct napi_value
   {
     public IntPtr Pointer;
+
+    public static implicit operator napi_value(IntPtr value) => new napi_value { Pointer = value };
   }
 
   public struct napi_value_ptr
@@ -227,65 +228,65 @@ namespace NApi
 
     // napi_status napi_set_property(napi_env env, napi_value object, napi_value key, napi_value value)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_set_property(napi_env env, IntPtr @object, IntPtr key,
-        IntPtr value);
+    internal static extern napi_status napi_set_property(napi_env env, napi_value @object, napi_value key, napi_value value);
 
     // napi_status napi_has_property(napi_env env, napi_value object, napi_value key, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_has_property(napi_env env, IntPtr @object, IntPtr key,
-        bool* result);
+    internal static extern napi_status napi_has_property(napi_env env, napi_value @object, napi_value key, out sbyte result);
 
     // napi_status napi_get_property(napi_env env, napi_value object, napi_value key, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_property(napi_env env, IntPtr @object, IntPtr key,
-        IntPtr result);
+    internal static extern napi_status napi_get_property(napi_env env, napi_value @object, napi_value key, out napi_value result);
 
     // napi_status napi_delete_property(napi_env env, napi_value object, napi_value key, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_delete_property(napi_env env, IntPtr @object,
-        IntPtr key, bool* result);
+    internal static extern napi_status napi_delete_property(napi_env env, napi_value @object, napi_value key, out sbyte result);
 
     // napi_status napi_has_own_property(napi_env env, napi_value object, napi_value key, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_has_own_property(napi_env env, IntPtr @object,
-        IntPtr key, bool* result);
+    internal static extern napi_status napi_has_own_property(napi_env env, napi_value @object, napi_value key, out sbyte result);
 
     // napi_status napi_set_named_property(napi_env env, napi_value object,
     //   const char* utf8name, napi_value value)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_set_named_property(napi_env env, IntPtr @object,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name, IntPtr value);
+    internal static extern napi_status napi_set_named_property(
+      napi_env env,
+      napi_value @object,
+      [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name,
+      napi_value value);
 
     // napi_status napi_has_named_property(napi_env env, napi_value object, const char *utf8name, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_has_named_property(napi_env env, IntPtr @object,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name, bool* result);
+    internal static extern napi_status napi_has_named_property(
+      napi_env env,
+      napi_value @object,
+      [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name,
+      out sbyte result);
 
     // napi_status napi_get_named_property(napi_env env, napi_value object,
     //    const char* utf8name, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_named_property(napi_env env, IntPtr @object,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name, IntPtr result);
+    internal static extern napi_status napi_get_named_property(
+      napi_env env,
+      napi_value @object,
+      [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name,
+      out napi_value result);
 
     // napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, napi_value value)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_set_element(napi_env env, IntPtr @object, uint index,
-        IntPtr value);
+    internal static extern napi_status napi_set_element(napi_env env, napi_value @object, uint index, napi_value value);
 
     // napi_status napi_has_element(napi_env env, napi_value object, uint32_t index, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_has_element(napi_env env, IntPtr @object, uint index,
-        bool* result);
+    internal static extern napi_status napi_has_element(napi_env env, napi_value @object, uint index, out sbyte result);
 
     // napi_status napi_get_element(napi_env env, napi_value object, uint32_t index, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_element(napi_env env, IntPtr @object, uint index,
-        IntPtr result);
+    internal static extern napi_status napi_get_element(napi_env env, napi_value @object, uint index, out napi_value result);
 
     // napi_status napi_delete_element(napi_env env, napi_value object, uint32_t index, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_delete_element(napi_env env, IntPtr @object, uint index,
-        bool* result);
+    internal static extern napi_status napi_delete_element(napi_env env, napi_value @object, uint index, out sbyte result);
 
     // napi_status napi_define_properties(napi_env env, napi_value object,
     //    size_t property_count, const napi_property_descriptor* properties)
@@ -624,15 +625,15 @@ namespace NApi
     // napi_status napi_check_object_type_tag(napi_env env, napi_value value,
     // const napi_type_tag* type_tag, bool* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_check_object_type_tag(napi_env env, IntPtr value,
+    internal static extern napi_status napi_check_object_type_tag(napi_env env, napi_value value,
         IntPtr type_tag, bool* result);
 
     // napi_status napi_object_freeze(napi_env env, napi_value object)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_object_freeze(napi_env env, IntPtr @object);
+    internal static extern napi_status napi_object_freeze(napi_env env, napi_value @object);
 
     // napi_status napi_object_seal(napi_env env, napi_value object)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_object_seal(napi_env env, IntPtr @object);
+    internal static extern napi_status napi_object_seal(napi_env env, napi_value @object);
   }
 }
