@@ -13,8 +13,8 @@ namespace NApi.Types
     public static unsafe JsString Create(JsScope scope, string value)
     {
       IntPtr valuePtr = new IntPtr();
-      byte[] utf8Str = Encoding.Default.GetBytes(value);
-      napi_create_string_utf8(scope.Env.EnvPtr, utf8Str.AsMemory().Pin().Pointer, (UIntPtr)utf8Str.Length, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+      byte[] utf8Str = Encoding.UTF8.GetBytes(value);
+      napi_create_string_utf8(new napi_env { Pointer = scope.Env.EnvPtr }, utf8Str.AsMemory().Pin().Pointer, (UIntPtr)utf8Str.Length, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
       return new JsString(scope, valuePtr);
     }
 

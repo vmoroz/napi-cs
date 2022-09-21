@@ -5,6 +5,11 @@ using System.Security;
 
 namespace NApi
 {
+  struct napi_env
+  {
+    public IntPtr Pointer;
+  }
+
   [SuppressUnmanagedCodeSecurity]
   public unsafe class NodeApi
   {
@@ -89,7 +94,7 @@ namespace NApi
 
     // napi_status napi_create_string_utf8(napi_env env, const char *str, size_t length, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_create_string_utf8(IntPtr env, void* str, UIntPtr length, IntPtr result);
+    internal static extern napi_status napi_create_string_utf8(napi_env env, void* str, nuint length, IntPtr result);
 
     // napi_status napi_create_string_utf16(napi_env env, const char16_t *str, size_t length, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -292,13 +297,13 @@ namespace NApi
         IntPtr constructor, bool* result);
 
     // napi_status napi_get_cb_info(
-    // napi_env env, // [in] NAPI environment handle
-    // napi_callback_info cbinfo, // [in] Opaque callback-info handle
-    // size_t* argc, // [in-out] Specifies the size of the provided argv array
-    //              // and receives the actual count of args.
-    // napi_value *argv, // [out] Array of values
-    // napi_value* this_arg, // [out] Receives the JS 'this' arg for the call
-    // void** data) // [out] Receives the data pointer for the callback.
+    //     napi_env env,              // [in] NAPI environment handle
+    //     napi_callback_info cbinfo, // [in] Opaque callback-info handle
+    //     size_t* argc,              // [in-out] Specifies the size of the provided argv array
+    //                                // and receives the actual count of args.
+    //     napi_value *argv,          // [out] Array of values
+    //     napi_value* this_arg,      // [out] Receives the JS 'this' arg for the call
+    //     void** data)               // [out] Receives the data pointer for the callback.
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_get_cb_info(IntPtr env, IntPtr cbinfo, UIntPtr* argc,
         IntPtr argv, IntPtr this_arg, IntPtr data);

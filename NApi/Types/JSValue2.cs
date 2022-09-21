@@ -132,7 +132,7 @@ namespace NApi.Types
       unsafe
       {
         return CreateJSValue((IntPtr env, IntPtr valuePtr) =>
-          napi_create_string_utf8(env, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
+          napi_create_string_utf8(new napi_env { Pointer = env }, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
       }
     }
 
@@ -283,6 +283,8 @@ namespace NApi.Types
         return true;
       }
     }
+
+    //TODO: add more string functions
 
     //TODO: implement in future
     //public static explicit operator double(JSValue value)
