@@ -15,5 +15,7 @@ namespace NApi.Types
     {
       return new(envPtr);
     }
+
+    public static implicit operator napi_env(JsEnv value) => new napi_env { Pointer = value.EnvPtr };
   }
 }

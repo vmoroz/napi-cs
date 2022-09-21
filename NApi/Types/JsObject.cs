@@ -18,20 +18,20 @@ namespace NApi.Types
     public static unsafe JsObject Create(JsScope scope)
     {
       IntPtr valuePtr = new IntPtr();
-      napi_create_object(scope.Env.EnvPtr, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+      napi_create_object(scope.Env, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
       return new JsObject(scope, valuePtr);
     }
 
     public unsafe JsValue Get(JsValue key)
     {
       IntPtr resultPtr = new IntPtr();
-      napi_get_property(Scope.Env.EnvPtr, ValuePtr, key.ValuePtr, new IntPtr(&resultPtr)).ThrowIfFailed(Scope);
+      napi_get_property(Scope.Env, ValuePtr, key.ValuePtr, new IntPtr(&resultPtr)).ThrowIfFailed(Scope);
       return JsValue.Create(Scope, resultPtr);
     }
 
     public void Set(JsValue key, JsValue value)
     {
-      napi_set_property(Scope.Env.EnvPtr, ValuePtr, key.ValuePtr, value.ValuePtr).ThrowIfFailed(Scope);
+      napi_set_property(Scope.Env, ValuePtr, key.ValuePtr, value.ValuePtr).ThrowIfFailed(Scope);
     }
 
     public static JsObject FromPointer(JsScope scope, IntPtr valuePtr)
