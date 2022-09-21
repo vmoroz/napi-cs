@@ -45,7 +45,7 @@ namespace NApi.Types
     private static unsafe JSValueType Typeof(JsScope scope, IntPtr valuePtr)
     {
       JSValueType valueType;
-      napi_typeof(scope.Env, valuePtr, &valueType).ThrowIfFailed(scope);
+      napi_typeof(scope.Env, new napi_value { Pointer = valuePtr }, &valueType).ThrowIfFailed(scope);
       return valueType;
     }
 

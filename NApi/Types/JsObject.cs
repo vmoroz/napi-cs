@@ -18,7 +18,7 @@ namespace NApi.Types
     public static unsafe JsObject Create(JsScope scope)
     {
       IntPtr valuePtr = new IntPtr();
-      napi_create_object(scope.Env, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+      napi_create_object(scope.Env, new napi_value_ptr { Pointer = new IntPtr(&valuePtr) }).ThrowIfFailed(scope);
       return new JsObject(scope, valuePtr);
     }
 

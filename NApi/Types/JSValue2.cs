@@ -26,12 +26,18 @@ namespace NApi.Types
   {
     internal JsScope Scope { get; }
 
-    internal IntPtr ValuePtr { get; }
+    internal napi_value Value { get; }
 
-    public JSValue(JsScope scope, IntPtr valuePtr)
+    public JSValue(JsScope scope, napi_value value)
     {
       Scope = scope;
-      ValuePtr = valuePtr;
+      Value = value;
+    }
+
+    public JSValue(napi_value value)
+    {
+      Scope = JsScope.Current ?? throw new InvalidOperationException("No current scope");
+      Value = value;
     }
 
     private static JsScope GetScope()
@@ -42,15 +48,13 @@ namespace NApi.Types
       return scope;
     }
 
-    private static JSValue CreateJSValue(Func<napi_env, IntPtr, napi_status> creator)
+    private static unsafe JSValue CreateJSValue(Func<napi_env, napi_value_ptr, napi_status> creator)
     {
       JsScope scope = GetScope();
-      IntPtr valuePtr;
-      unsafe
-      {
-        creator(scope.Env, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
-      }
-      return new JSValue(scope, valuePtr);
+      napi_value value;
+      napi_value_ptr valuePtr = new napi_value_ptr { Pointer = new IntPtr(&value) };
+      creator(scope.Env, valuePtr).ThrowIfFailed(scope);
+      return new JSValue(scope, value);
     }
 
     public static JSValue GetUndefined()
@@ -70,58 +74,51 @@ namespace NApi.Types
 
     public static JSValue GetBoolean(bool value)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_get_boolean(env, value, valuePtr));
+      return CreateJSValue((env, result) => napi_get_boolean(env, value, result));
     }
 
     public static JSValue CreateObject()
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_object(env, valuePtr));
+      return CreateJSValue((env, result) => napi_create_object(env, result));
     }
 
     public static JSValue CreateArray()
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_array(env, valuePtr));
+      return CreateJSValue((env, result) => napi_create_array(env, result));
     }
 
-    public static JSValue CreateArray(uint length)
+    public static JSValue CreateArray(int length)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_array_with_length(env, (UIntPtr)length, valuePtr));
+      return CreateJSValue((env, result) =>
+        napi_create_array_with_length(env, (nuint)length, result));
     }
 
     public static JSValue CreateNumber(double value)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_double(env, value, valuePtr));
+      return CreateJSValue((env, result) => napi_create_double(env, value, result));
     }
 
     public static JSValue CreateNumber(int value)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_int32(env, value, valuePtr));
+      return CreateJSValue((env, result) => napi_create_int32(env, value, result));
     }
 
     public static JSValue CreateNumber(uint value)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_uint32(env, value, valuePtr));
+      return CreateJSValue((env, result) => napi_create_uint32(env, value, result));
     }
 
     public static JSValue CreateNumber(long value)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_int64(env, value, valuePtr));
+      return CreateJSValue((env, result) => napi_create_int64(env, value, result));
     }
 
     public static JSValue CreateStringLatin1(ReadOnlyMemory<byte> value)
     {
       unsafe
       {
-        return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-          napi_create_string_latin1(env, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
+        return CreateJSValue((env, result) =>
+          napi_create_string_latin1(env, value.Pin().Pointer, (nuint)value.Length, result));
       }
     }
 
@@ -129,8 +126,8 @@ namespace NApi.Types
     {
       unsafe
       {
-        return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-          napi_create_string_utf8(env, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
+        return CreateJSValue((env, result) =>
+          napi_create_string_utf8(env, value.Pin().Pointer, (nuint)value.Length, result));
       }
     }
 
@@ -138,8 +135,8 @@ namespace NApi.Types
     {
       unsafe
       {
-        return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-          napi_create_string_utf16(env, value.Pin().Pointer, (UIntPtr)value.Length, valuePtr));
+        return CreateJSValue((env, result) =>
+          napi_create_string_utf16(env, value.Pin().Pointer, (nuint)value.Length, result));
       }
     }
 
@@ -150,20 +147,20 @@ namespace NApi.Types
 
     public static JSValue CreateSymbol(JSValue description)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_symbol(env, description.ValuePtr, valuePtr));
+      return CreateJSValue((env, result) =>
+        napi_create_symbol(env, description.Value, result));
     }
 
     public static JSValue CreateSymbol(string description)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_symbol(env, CreateStringUtf16(description).ValuePtr, valuePtr));
+      return CreateJSValue((env, result) =>
+        napi_create_symbol(env, CreateStringUtf16(description).Value, result));
     }
 
     public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> callback, IntPtr data)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_function(env, utf8Name.Pin().Pointer, (UIntPtr)utf8Name.Length, callback, data, valuePtr));
+      return CreateJSValue((env, result) =>
+        napi_create_function(env, utf8Name.Pin().Pointer, (nuint)utf8Name.Length, callback, data, result));
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
@@ -180,7 +177,7 @@ namespace NApi.Types
           JSCallback cb = (JSCallback)GCHandle.FromIntPtr(data).Target!;
           JSValue result = cb(cbInfo);
           // TODO: implement escapable scope
-          return result.ValuePtr;
+          return result.Value.Pointer;
         }
       }
       catch (System.Exception e)
@@ -203,7 +200,7 @@ namespace NApi.Types
       GCHandle callbackHandle = GCHandle.Alloc(callback);
       JSValue func = CreateFunction(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle);
       napi_add_finalizer(
-        func.Scope.Env, func.ValuePtr, (IntPtr)callbackHandle, &FinalizeJSCallback, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(func.Scope);
+        func.Scope.Env, func.Value.Pointer, (IntPtr)callbackHandle, &FinalizeJSCallback, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(func.Scope);
       return func;
     }
 
@@ -214,52 +211,52 @@ namespace NApi.Types
 
     public static JSValue CreateError(JSValue code, JSValue message)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_error(env, code.ValuePtr, message.ValuePtr, valuePtr));
+      return CreateJSValue((env, result) =>
+        napi_create_error(env, code.Value, message.Value, result));
     }
 
     public static JSValue CreateTypeError(JSValue code, JSValue message)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_type_error(env, code.ValuePtr, message.ValuePtr, valuePtr));
+      return CreateJSValue((env, result) =>
+        napi_create_type_error(env, code.Value, message.Value, result));
     }
 
     public static JSValue CreateRangeError(JSValue code, JSValue message)
     {
-      return CreateJSValue((napi_env env, IntPtr valuePtr) =>
-        napi_create_range_error(env, code.ValuePtr, message.ValuePtr, valuePtr));
+      return CreateJSValue((env, result) =>
+        napi_create_range_error(env, code.Value, message.Value, result));
     }
 
     public unsafe JSValueType TypeOf()
     {
       JSValueType result;
-      napi_typeof(Scope.Env, ValuePtr, &result).ThrowIfFailed(Scope);
+      napi_typeof(Scope.Env, Value, &result).ThrowIfFailed(Scope);
       return result;
     }
 
     public bool TryGetValue(out double value)
     {
-      return napi_get_value_double(Scope.Env, ValuePtr, out value) == napi_status.napi_ok;
+      return napi_get_value_double(Scope.Env, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out int value)
     {
-      return napi_get_value_int32(Scope.Env, ValuePtr, out value) == napi_status.napi_ok;
+      return napi_get_value_int32(Scope.Env, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out uint value)
     {
-      return napi_get_value_uint32(Scope.Env, ValuePtr, out value) == napi_status.napi_ok;
+      return napi_get_value_uint32(Scope.Env, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out long value)
     {
-      return napi_get_value_int64(Scope.Env, ValuePtr, out value) == napi_status.napi_ok;
+      return napi_get_value_int64(Scope.Env, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out bool value)
     {
-      return napi_get_value_bool(Scope.Env, ValuePtr, out value) == napi_status.napi_ok;
+      return napi_get_value_bool(Scope.Env, Value, out value) == napi_status.napi_ok;
     }
 
     public unsafe bool TryGetValue(out string value)
@@ -267,7 +264,7 @@ namespace NApi.Types
       // TODO: add check that the object is still alive
       // TODO: should we check value type first?
       nuint length;
-      if (napi_get_value_string_utf16(Scope.Env, ValuePtr, null, 0, &length) != napi_status.napi_ok)
+      if (napi_get_value_string_utf16(Scope.Env, Value, null, 0, &length) != napi_status.napi_ok)
       {
         value = string.Empty;
         return false;
@@ -276,7 +273,7 @@ namespace NApi.Types
       char[] buf = new char[length + 1];
       fixed (char* bufStart = &buf[0])
       {
-        napi_get_value_string_utf16(Scope.Env, ValuePtr, bufStart, (nuint)buf.Length, null).ThrowIfFailed(Scope);
+        napi_get_value_string_utf16(Scope.Env, Value, bufStart, (nuint)buf.Length, null).ThrowIfFailed(Scope);
         value = new string(buf);
         return true;
       }
@@ -298,5 +295,37 @@ namespace NApi.Types
     //  get { return GetProperty(name); }
     //  set { SetProperty(name, value); }
     //}
+
+    public static explicit operator napi_value(JSValue value) => value.Value;
+
+    public static implicit operator JSValue(napi_value value) => new JSValue(value);
+
+    public unsafe JSValue CoerceToBoolean()
+    {
+      napi_value result;
+      napi_coerce_to_bool(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue CoerceToNumber()
+    {
+      napi_value result;
+      napi_coerce_to_number(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue CoerceToObject()
+    {
+      napi_value result;
+      napi_coerce_to_object(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue CoerceToString()
+    {
+      napi_value result;
+      napi_coerce_to_string(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      return result;
+    }
   }
 }

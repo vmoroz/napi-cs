@@ -12,14 +12,14 @@ namespace NApi.Types
     public static unsafe JsNumber Create(JsScope scope, double value)
     {
       IntPtr valuePtr = new IntPtr();
-      napi_create_double(scope.Env, value, new IntPtr(&valuePtr)).ThrowIfFailed(scope);
+      napi_create_double(scope.Env, value, new napi_value_ptr { Pointer = new IntPtr(&valuePtr) }).ThrowIfFailed(scope);
       return new JsNumber(scope, valuePtr);
     }
 
     public double ToDouble()
     {
       double result;
-      napi_get_value_double(Scope.Env, ValuePtr, out result).ThrowIfFailed(Scope);
+      napi_get_value_double(Scope.Env, new napi_value { Pointer = ValuePtr }, out result).ThrowIfFailed(Scope);
       return result;
     }
   }
