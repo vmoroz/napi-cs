@@ -300,31 +300,31 @@ namespace NApi.Types
 
     public static implicit operator JSValue(napi_value value) => new JSValue(value);
 
-    public unsafe JSValue CoerceToBoolean()
+    public JSValue CoerceToBoolean()
     {
       napi_value result;
-      napi_coerce_to_bool(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      napi_coerce_to_bool(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
       return result;
     }
 
-    public unsafe JSValue CoerceToNumber()
+    public JSValue CoerceToNumber()
     {
       napi_value result;
-      napi_coerce_to_number(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      napi_coerce_to_number(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
       return result;
     }
 
-    public unsafe JSValue CoerceToObject()
+    public JSValue CoerceToObject()
     {
       napi_value result;
-      napi_coerce_to_object(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      napi_coerce_to_object(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
       return result;
     }
 
-    public unsafe JSValue CoerceToString()
+    public JSValue CoerceToString()
     {
       napi_value result;
-      napi_coerce_to_string(Scope.Env, (napi_value)this, &result).ThrowIfFailed(Scope);
+      napi_coerce_to_string(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
       return result;
     }
   }
