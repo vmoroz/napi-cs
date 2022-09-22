@@ -397,13 +397,16 @@ namespace NApi
     // napi_status napi_create_external(napi_env env, void* data,
     // napi_finalize finalize_cb, void* finalize_hint, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_create_external(napi_env env, IntPtr data,
-        IntPtr finalize_cb, IntPtr finalize_hint, IntPtr result);
+    internal static extern napi_status napi_create_external(
+      napi_env env,
+      IntPtr data,
+      delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
+      IntPtr finalize_hint,
+      out napi_value result);
 
     // napi_status napi_get_value_external(napi_env env, napi_value value, void **result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_value_external(napi_env env, IntPtr value,
-        void** result);
+    internal static extern napi_status napi_get_value_external(napi_env env, napi_value value, out IntPtr result);
 
     // napi_status napi_create_reference(napi_env env, napi_value value,
     //  uint32_t initial_refcount, napi_ref *result)

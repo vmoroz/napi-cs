@@ -735,8 +735,8 @@ namespace NApi.Types
 
     public unsafe void Wrap(object value)
     {
-      GCHandle callbackHandle = GCHandle.Alloc(value);
-      napi_wrap((napi_env)Scope, (napi_value)this, (IntPtr)callbackHandle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed(Scope);
+      GCHandle valueHandle = GCHandle.Alloc(value);
+      napi_wrap((napi_env)Scope, (napi_value)this, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed(Scope);
     }
 
     public object Unwrap()
@@ -749,8 +749,21 @@ namespace NApi.Types
     public object RemoveWrap()
     {
       napi_remove_wrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
-      GCHandle handle = GCHandle.FromIntPtr(result);
-      return handle.Target!;
+      return GCHandle.FromIntPtr(result).Target!;
+    }
+
+    public static unsafe JSValue CreateExternal(object value)
+    {
+      JsScope scope = JsScope.EnsureCurrent();
+      GCHandle valueHandle = GCHandle.Alloc(value);
+      napi_create_external((napi_env)scope, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, out napi_value result).ThrowIfFailed(scope);
+      return result;
+    }
+
+    public unsafe object GetExternalValue()
+    {
+      napi_get_value_external((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
+      return GCHandle.FromIntPtr(result).Target!;
     }
   }
 }
