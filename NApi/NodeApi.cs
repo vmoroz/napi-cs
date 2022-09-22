@@ -363,27 +363,36 @@ namespace NApi
     internal static extern napi_status napi_get_new_target(napi_env env, napi_callback_info cbinfo, out napi_value result);
 
     // napi_status napi_define_class(napi_env env, const char* utf8name, size_t length,
-    // napi_callback constructor, void* data, size_t property_count, const napi_property_descriptor* properties, napi_value *result)
+    //    napi_callback constructor, void* data, size_t property_count, const napi_property_descriptor* properties, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_define_class(napi_env env,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name, ulong length, IntPtr constructor, void* data,
-        ulong property_count,
-        IntPtr properties, IntPtr result);
+    internal static extern napi_status napi_define_class(
+        napi_env env,
+        void* utf8name,
+        nuint length,
+        delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> constructor,
+        IntPtr data,
+        nuint property_count,
+        napi_property_descriptor* properties,
+        out napi_value result);
 
     // napi_status napi_wrap(napi_env env, napi_value js_object, void* native_object,
     // napi_finalize finalize_cb, void* finalize_hint, napi_ref *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_wrap(napi_env env, IntPtr js_object,
-        IntPtr native_object, IntPtr finalize_cb, IntPtr finalize_hint, IntPtr result);
+    internal static extern napi_status napi_wrap(
+      napi_env env,
+      napi_value js_object,
+      IntPtr native_object,
+      delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
+      IntPtr finalize_hint,
+      napi_ref* result);
 
     // napi_status napi_unwrap(napi_env env, napi_value js_object, void **result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_unwrap(napi_env env, IntPtr js_object, void** result);
+    internal static extern napi_status napi_unwrap(napi_env env, napi_value js_object, out IntPtr result);
 
     // napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_remove_wrap(napi_env env, IntPtr js_object,
-        void** result);
+    internal static extern napi_status napi_remove_wrap(napi_env env, napi_value js_object, out IntPtr result);
 
     // napi_status napi_create_external(napi_env env, void* data,
     // napi_finalize finalize_cb, void* finalize_hint, napi_value *result)

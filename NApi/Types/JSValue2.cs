@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -288,18 +289,24 @@ namespace NApi.Types
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static unsafe void FinalizeJSCallback(IntPtr env, IntPtr data, IntPtr hint)
+    private static unsafe void FinalizeHandle(IntPtr env, IntPtr data, IntPtr hint)
     {
-      GCHandle callbackHandle = GCHandle.FromIntPtr(data);
-      callbackHandle.Free();
+      GCHandle.FromIntPtr(data).Free();
+    }
+
+    public unsafe void AddHandleFinalizer(IntPtr handle)
+    {
+      if (handle != IntPtr.Zero)
+      {
+        napi_add_finalizer(Scope.Env, (napi_value)this, handle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed(Scope);
+      }
     }
 
     public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, JSCallback callback)
     {
       GCHandle callbackHandle = GCHandle.Alloc(callback);
       JSValue func = CreateFunction(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle);
-      napi_add_finalizer(
-        func.Scope.Env, func.Value.Pointer, (IntPtr)callbackHandle, &FinalizeJSCallback, IntPtr.Zero, null).ThrowIfFailed(func.Scope);
+      func.AddHandleFinalizer((IntPtr)callbackHandle);
       return func;
     }
 
@@ -578,8 +585,11 @@ namespace NApi.Types
       }
     }
 
-    public unsafe void DefineProperties(params JSPropertyDescriptor[] descriptors)
+    private unsafe delegate void UseUnmanagedDescriptors(nuint count, napi_property_descriptor* descriptors);
+
+    private static unsafe IntPtr[] ToUnmanagedPropertyDescriptors(JSPropertyDescriptor[] descriptors, UseUnmanagedDescriptors action)
     {
+      IntPtr[] handlesToFinalize = new IntPtr[descriptors.Length];
       int count = descriptors.Length;
       napi_property_descriptor* descriptorsPtr = stackalloc napi_property_descriptor[count];
       for (int i = 0; i < count; i++)
@@ -595,17 +605,22 @@ namespace NApi.Types
         descriptorPtr->attributes = (napi_property_attributes)(int)descriptor.Attributes;
         if (descriptor.Method != null || descriptor.Getter != null || descriptor.Setter != null)
         {
-          GCHandle descriptorHandle = GCHandle.Alloc(descriptor);
-          napi_add_finalizer(
-            Scope.Env, (napi_value)this, (IntPtr)descriptorHandle, &FinalizeJSCallback, IntPtr.Zero, null).ThrowIfFailed(Scope);
-          descriptorPtr->data = (IntPtr)descriptorHandle;
+          handlesToFinalize[i] = descriptorPtr->data = (IntPtr)GCHandle.Alloc(descriptor);
         }
         else
         {
-          descriptorPtr->data = IntPtr.Zero;
+          handlesToFinalize[i] = descriptorPtr->data = IntPtr.Zero;
         }
       }
-      napi_define_properties(Scope.Env, (napi_value)this, (nuint)count, descriptorsPtr).ThrowIfFailed(Scope);
+      action((nuint)count, descriptorsPtr);
+      return handlesToFinalize;
+    }
+
+    public unsafe void DefineProperties(params JSPropertyDescriptor[] descriptors)
+    {
+      IntPtr[] handles = ToUnmanagedPropertyDescriptors(descriptors, (count, descriptorsPtr) =>
+        napi_define_properties(Scope.Env, (napi_value)this, count, descriptorsPtr).ThrowIfFailed(Scope));
+      Array.ForEach(handles, handle => AddHandleFinalizer(handle));
     }
 
     public bool IsArray()
@@ -687,6 +702,55 @@ namespace NApi.Types
     {
       napi_instanceof(Scope.Env, (napi_value)this, (napi_value)constructor, out sbyte result).ThrowIfFailed(Scope);
       return result != 0;
+    }
+
+    public static unsafe JSValue DefineClass(
+      ReadOnlyMemory<byte> utf8Name,
+      delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> callback,
+      IntPtr data,
+      nuint count,
+      napi_property_descriptor* descriptors)
+    {
+      JsScope scope = JsScope.EnsureCurrent();
+      napi_define_class((napi_env)scope, utf8Name.Pin().Pointer, (nuint)utf8Name.Length, callback, data, count, descriptors, out napi_value result).ThrowIfFailed(scope);
+      return result;
+    }
+
+    public static unsafe JSValue DefineClass(ReadOnlyMemory<byte> utf8Name, JSCallback callback, params JSPropertyDescriptor[] descriptors)
+    {
+      GCHandle callbackHandle = GCHandle.Alloc(callback);
+      JSValue? func = null;
+      IntPtr[] handles = ToUnmanagedPropertyDescriptors(descriptors, (count, descriptorsPtr) =>
+      {
+        func = DefineClass(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle, count, descriptorsPtr);
+      });
+      Array.ForEach(handles, handle => func!.AddHandleFinalizer(handle));
+      return func!;
+    }
+
+    public static unsafe JSValue DefineClass(string name, JSCallback callback, params JSPropertyDescriptor[] descriptors)
+    {
+      return DefineClass(Encoding.UTF8.GetBytes(name), callback, descriptors);
+    }
+
+    public unsafe void Wrap(object value)
+    {
+      GCHandle callbackHandle = GCHandle.Alloc(value);
+      napi_wrap((napi_env)Scope, (napi_value)this, (IntPtr)callbackHandle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed(Scope);
+    }
+
+    public object Unwrap()
+    {
+      napi_unwrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
+      GCHandle handle = GCHandle.FromIntPtr(result);
+      return handle.Target!;
+    }
+
+    public object RemoveWrap()
+    {
+      napi_remove_wrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
+      GCHandle handle = GCHandle.FromIntPtr(result);
+      return handle.Target!;
     }
   }
 }

@@ -58,5 +58,16 @@ namespace NApi.Types
         throw new NApiException("Out of scope!");
       }
     }
+
+    public static JsScope EnsureCurrent()
+    {
+      JsScope? scope = Current;
+      if (scope == null)
+        throw new InvalidOperationException("Scope is null");
+      return scope;
+    }
+
+    public static explicit operator napi_env(JsScope scope) =>
+      new napi_env(){ Pointer = scope.Env.EnvPtr };
   }
 }

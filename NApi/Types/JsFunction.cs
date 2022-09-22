@@ -31,8 +31,8 @@ namespace NApi.Types
     //  return jsFunction;
     //}
 
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate IntPtr napi_callback(IntPtr envPtr, IntPtr infoPtr);
+    //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    //private delegate IntPtr napi_callback(IntPtr envPtr, IntPtr infoPtr);
 
     public delegate JsValue user_callback(JsScope scope, JsValue @this, JsValue[] args);
 
