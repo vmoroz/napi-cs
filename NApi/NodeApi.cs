@@ -14,6 +14,8 @@ namespace NApi
   {
     public IntPtr Pointer;
 
+    public bool IsNull => Pointer == IntPtr.Zero;
+
     public static implicit operator napi_value(IntPtr value) => new napi_value { Pointer = value };
 
     public static readonly napi_value Null = new napi_value { Pointer = IntPtr.Zero };
@@ -28,7 +30,12 @@ namespace NApi
 
   public struct napi_ref
   {
-    public IntPtr Pointer;
+    private IntPtr _handle;
+
+    public napi_ref(IntPtr handle) { _handle = handle; }
+
+    public static explicit operator IntPtr(napi_ref reference) => reference._handle;
+    public static explicit operator napi_ref(IntPtr handle) => new napi_ref(handle);
   }
 
   public struct napi_handle_scope
@@ -411,24 +418,24 @@ namespace NApi
     // napi_status napi_create_reference(napi_env env, napi_value value,
     //  uint32_t initial_refcount, napi_ref *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_create_reference(napi_env env, IntPtr value,
-        uint initial_refcount, IntPtr result);
+    internal static extern napi_status napi_create_reference(napi_env env, napi_value value,
+        uint initial_refcount, out napi_ref result);
 
     // napi_status napi_delete_reference(napi_env env, napi_ref ref)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_delete_reference(napi_env env, IntPtr @ref);
+    internal static extern napi_status napi_delete_reference(napi_env env, napi_ref @ref);
 
     // napi_status napi_reference_ref(napi_env env, napi_ref ref, uint32_t *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_reference_ref(napi_env env, IntPtr @ref, uint* result);
+    internal static extern napi_status napi_reference_ref(napi_env env, napi_ref @ref, IntPtr result);
 
     // napi_status napi_reference_unref(napi_env env, napi_ref ref, uint32_t *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_reference_unref(napi_env env, IntPtr @ref, uint* result);
+    internal static extern napi_status napi_reference_unref(napi_env env, napi_ref @ref, IntPtr result);
 
     // napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_reference_value(napi_env env, IntPtr @ref, IntPtr result);
+    internal static extern napi_status napi_get_reference_value(napi_env env, napi_ref @ref, out napi_value result);
 
     // napi_status napi_open_handle_scope(napi_env env, napi_handle_scope* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

@@ -765,5 +765,15 @@ namespace NApi.Types
       napi_get_value_external((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
       return GCHandle.FromIntPtr(result).Target!;
     }
+
+    public JSReference CreateReference()
+    {
+      return new JSReference(Scope.Env, (napi_value)this);
+    }
+
+    public JSReference CreateWeakReference()
+    {
+      return new JSReference(Scope.Env, (napi_value)this, isWeak: true);
+    }
   }
 }
