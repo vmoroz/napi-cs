@@ -333,14 +333,14 @@ namespace NApi
     // napi_status napi_call_function(napi_env env, napi_value recv, napi_value func,
     //   size_t argc, const napi_value* argv, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_call_function(napi_env env, IntPtr recv, IntPtr func,
-        ulong argc, IntPtr argv, IntPtr result);
+    internal static unsafe extern napi_status napi_call_function(napi_env env, napi_value recv, napi_value func,
+        nuint argc, napi_value* argv, out napi_value result);
 
     // napi_status napi_new_instance(napi_env env, napi_value constructor,
     //    size_t argc, const napi_value* argv, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_new_instance(napi_env env, IntPtr constructor,
-        ulong argc, IntPtr argv, IntPtr result);
+    internal static extern napi_status napi_new_instance(napi_env env, napi_value constructor,
+        nuint argc, napi_value* argv, napi_value* result);
 
     // napi_status napi_instanceof(napi_env env, napi_value object, napi_value constructor, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

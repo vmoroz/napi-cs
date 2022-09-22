@@ -594,5 +594,37 @@ namespace NApi.Types
       napi_strict_equals(Scope.Env, (napi_value)this, (napi_value)other, out sbyte result);
       return result != 0;
     }
+
+    public unsafe JSValue Call()
+    {
+      napi_call_function(Scope.Env, (napi_value)GetUndefined(), (napi_value)this, 0, null, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue Call(JSValue thisArg)
+    {
+      napi_call_function(Scope.Env, (napi_value)thisArg, (napi_value)this, 0, null, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue Call(JSValue thisArg, JSValue arg0)
+    {
+      napi_value argValue0 = (napi_value)arg0;
+      napi_call_function(Scope.Env, (napi_value)thisArg, (napi_value)this, 1, &argValue0, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue Call(JSValue thisArg, params JSValue[] args)
+    {
+      int argc = args.Length;
+      napi_value* argv = stackalloc napi_value[argc];
+      for (int i = 0; i < argc; ++i)
+      {
+        argv[i] = (napi_value)args[i];
+      }
+      napi_call_function(Scope.Env, (napi_value)thisArg, (napi_value)this,
+        (nuint)argc, argv, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
   }
 }
