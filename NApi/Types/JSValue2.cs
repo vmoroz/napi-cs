@@ -12,7 +12,7 @@ namespace NApi.Types
 
     public JSValue this[int index]
     {
-      get {  return _args[index]; }
+      get { return _args[index]; }
     }
 
     public int Length
@@ -23,6 +23,12 @@ namespace NApi.Types
     public JSValue ThisArg { get; }
 
     public IntPtr Data { get; }
+
+    public JSValue GetNewTarget()
+    {
+      napi_get_new_target(Scope.Env, CallbackInfo, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
 
     internal JsScope Scope { get; }
 

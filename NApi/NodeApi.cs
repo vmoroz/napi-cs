@@ -360,8 +360,7 @@ namespace NApi
 
     // napi_status napi_get_new_target(napi_env env, napi_callback_info cbinfo, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_new_target(napi_env env, IntPtr cbinfo,
-        IntPtr result);
+    internal static extern napi_status napi_get_new_target(napi_env env, napi_callback_info cbinfo, out napi_value result);
 
     // napi_status napi_define_class(napi_env env, const char* utf8name, size_t length,
     // napi_callback constructor, void* data, size_t property_count, const napi_property_descriptor* properties, napi_value *result)
