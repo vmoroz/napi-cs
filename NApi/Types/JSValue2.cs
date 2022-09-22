@@ -6,20 +6,54 @@ using static NApi.NodeApi;
 
 namespace NApi.Types
 {
-  public ref struct JSCallbackInfo
+  public ref struct JSCallbackArgs
   {
+    private JSValue[] _args;
+
+    public JSValue this[int index]
+    {
+      get {  return _args[index]; }
+    }
+
+    public int Length
+    {
+      get { return _args.Length; }
+    }
+
+    public JSValue ThisArg { get; }
+
+    public IntPtr Data { get; }
+
     internal JsScope Scope { get; }
 
-    internal IntPtr CallbackInfo { get; }
+    internal napi_callback_info CallbackInfo { get; }
 
-    public JSCallbackInfo(JsScope scope, IntPtr callbackInfo)
+    public JSCallbackArgs(JsScope scope, napi_callback_info callbackInfo)
     {
       Scope = scope;
       CallbackInfo = callbackInfo;
+      unsafe
+      {
+        nuint argc = 0;
+        napi_get_cb_info(scope.Env, callbackInfo, &argc, null, null, IntPtr.Zero).ThrowIfFailed(scope);
+        napi_value* argv = stackalloc napi_value[(int)argc];
+        napi_value thisArg;
+        IntPtr data;
+        napi_get_cb_info(scope.Env, callbackInfo, &argc, argv, &thisArg, new IntPtr(&data)).ThrowIfFailed(scope);
+
+        _args = new JSValue[(int)argc];
+        for (int i = 0; i < (int)argc; ++i)
+        {
+          _args[i] = argv[i];
+        }
+
+        ThisArg = thisArg;
+        Data = data;
+      }
     }
   }
 
-  public delegate JSValue JSCallback(JSCallbackInfo info);
+  public delegate JSValue JSCallback(JSCallbackArgs args);
 
   [Flags]
   public enum JSPropertyAttributes : int
@@ -218,27 +252,25 @@ namespace NApi.Types
         napi_create_symbol(env, CreateStringUtf16(description).Value, result));
     }
 
-    public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> callback, IntPtr data)
+    public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name,
+      delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> callback, IntPtr data)
     {
       return CreateJSValue((env, result) =>
         napi_create_function(env, utf8Name.Pin().Pointer, (nuint)utf8Name.Length, callback, data, result));
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static unsafe IntPtr InvokeJSCallback(IntPtr env, IntPtr callbackInfo)
+    private static unsafe napi_value InvokeJSCallback(napi_env env, napi_callback_info callbackInfo)
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env)))
+        using (var scope = new JsScope(new JsEnv(env.Pointer)))
         {
-          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
-
-          IntPtr data;
-          napi_get_cb_info(scope.Env, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
-          JSCallback cb = (JSCallback)GCHandle.FromIntPtr(data).Target!;
-          JSValue result = cb(cbInfo);
+          JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
+          JSCallback callback = (JSCallback)GCHandle.FromIntPtr(args.Data).Target!;
+          JSValue result = callback(args);
           // TODO: implement escapable scope
-          return result.Value.Pointer;
+          return result.Value;
         }
       }
       catch (System.Exception e)
@@ -317,7 +349,9 @@ namespace NApi.Types
 
     public bool TryGetValue(out bool value)
     {
-      return napi_get_value_bool(Scope.Env, Value, out value) == napi_status.napi_ok;
+      napi_status status = napi_get_value_bool(Scope.Env, Value, out sbyte result);
+      value = result != 0;
+      return status == napi_status.napi_ok;
     }
 
     public unsafe bool TryGetValue(out string value)
@@ -473,20 +507,17 @@ namespace NApi.Types
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static unsafe IntPtr InvokeJSMethod(IntPtr env, IntPtr callbackInfo)
+    private static unsafe napi_value InvokeJSMethod(napi_env env, napi_callback_info callbackInfo)
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env)))
+        using (var scope = new JsScope(new JsEnv(env.Pointer)))
         {
-          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
-
-          IntPtr data;
-          napi_get_cb_info(scope.Env, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
-          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(data).Target!;
-          JSValue result = desc.Method!.Invoke(cbInfo);
+          JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
+          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
+          JSValue result = desc.Method!.Invoke(args);
           // TODO: implement escapable scope
-          return result.Value.Pointer;
+          return result.Value;
         }
       }
       catch (System.Exception e)
@@ -498,20 +529,17 @@ namespace NApi.Types
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static unsafe IntPtr InvokeJSGetter(IntPtr env, IntPtr callbackInfo)
+    private static unsafe napi_value InvokeJSGetter(napi_env env, napi_callback_info callbackInfo)
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env)))
+        using (var scope = new JsScope(new JsEnv(env.Pointer)))
         {
-          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
-
-          IntPtr data;
-          napi_get_cb_info(scope.Env, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
-          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(data).Target!;
-          JSValue result = desc.Getter!.Invoke(cbInfo);
+          JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
+          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
+          JSValue result = desc.Getter!.Invoke(args);
           // TODO: implement escapable scope
-          return result.Value.Pointer;
+          return result.Value;
         }
       }
       catch (System.Exception e)
@@ -523,18 +551,15 @@ namespace NApi.Types
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static unsafe IntPtr InvokeJSSetter(IntPtr env, IntPtr callbackInfo)
+    private static unsafe napi_value InvokeJSSetter(napi_env env, napi_callback_info callbackInfo)
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env)))
+        using (var scope = new JsScope(new JsEnv(env.Pointer)))
         {
-          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
-
-          IntPtr data;
-          napi_get_cb_info(scope.Env, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
-          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(data).Target!;
-          JSValue result = desc.Setter!.Invoke(cbInfo);
+          JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
+          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
+          JSValue result = desc.Setter!.Invoke(args);
           // TODO: implement escapable scope
           return result.Value.Pointer;
         }

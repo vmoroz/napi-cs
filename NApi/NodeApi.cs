@@ -64,9 +64,9 @@ namespace NApi
     public IntPtr utf8name;
     public napi_value name;
 
-    public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> method;
-    public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> getter;
-    public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> setter;
+    public delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> method;
+    public delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> getter;
+    public delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> setter;
     public napi_value value;
 
     public napi_property_attributes attributes;
@@ -170,7 +170,7 @@ namespace NApi
     //    napi_callback cb, void* data, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_create_function(napi_env env,
-        void* utf8name, UIntPtr length, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> cb, IntPtr data, napi_value_ptr result);
+        void* utf8name, nuint length, delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> cb, IntPtr data, napi_value_ptr result);
 
     // napi_status napi_create_error(napi_env env, napi_value code, napi_value msg, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -351,12 +351,12 @@ namespace NApi
     //     napi_callback_info cbinfo, // [in] Opaque callback-info handle
     //     size_t* argc,              // [in-out] Specifies the size of the provided argv array
     //                                // and receives the actual count of args.
-    //     napi_value *argv,          // [out] Array of values
+    //     napi_value* argv,          // [out] Array of values
     //     napi_value* this_arg,      // [out] Receives the JS 'this' arg for the call
     //     void** data)               // [out] Receives the data pointer for the callback.
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_cb_info(napi_env env, IntPtr cbinfo, UIntPtr* argc,
-        IntPtr argv, IntPtr this_arg, IntPtr data);
+    internal static unsafe extern napi_status napi_get_cb_info(napi_env env, napi_callback_info cbinfo,
+      nuint* argc, napi_value* argv, napi_value* this_arg, IntPtr data);
 
     // napi_status napi_get_new_target(napi_env env, napi_callback_info cbinfo, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -417,8 +417,7 @@ namespace NApi
 
     // napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_reference_value(napi_env env, IntPtr @ref,
-        IntPtr result);
+    internal static extern napi_status napi_get_reference_value(napi_env env, IntPtr @ref, IntPtr result);
 
     // napi_status napi_open_handle_scope(napi_env env, napi_handle_scope* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
