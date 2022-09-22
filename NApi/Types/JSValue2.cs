@@ -576,5 +576,23 @@ namespace NApi.Types
       }
       napi_define_properties(Scope.Env, (napi_value)this, (nuint)count, descriptorsPtr).ThrowIfFailed(Scope);
     }
+
+    public bool IsArray()
+    {
+      napi_is_array(Scope.Env, (napi_value)this, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
+
+    public int GetLength()
+    {
+      napi_get_array_length(Scope.Env, (napi_value)this, out uint result).ThrowIfFailed(Scope);
+      return (int)result;
+    }
+
+    public bool StrictEquals(JSValue other)
+    {
+      napi_strict_equals(Scope.Env, (napi_value)this, (napi_value)other, out sbyte result);
+      return result != 0;
+    }
   }
 }

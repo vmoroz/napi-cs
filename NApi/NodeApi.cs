@@ -320,17 +320,15 @@ namespace NApi
 
     // napi_status napi_is_array(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_array(napi_env env, IntPtr value, bool* result);
+    internal static extern napi_status napi_is_array(napi_env env, napi_value value, out sbyte result);
 
     // napi_status napi_get_array_length(napi_env env, napi_value value, uint32_t *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status
-        napi_get_array_length(napi_env env, IntPtr value, uint* result);
+    internal static extern napi_status napi_get_array_length(napi_env env, napi_value value, out uint result);
 
     // napi_status napi_strict_equals(napi_env env, napi_value lhs, napi_value rhs, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_strict_equals(napi_env env, IntPtr lhs, IntPtr rhs,
-        bool* result);
+    internal static extern napi_status napi_strict_equals(napi_env env, napi_value lhs, napi_value rhs, out sbyte result);
 
     // napi_status napi_call_function(napi_env env, napi_value recv, napi_value func,
     //   size_t argc, const napi_value* argv, napi_value *result)
