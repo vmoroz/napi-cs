@@ -206,7 +206,7 @@ namespace NApi
 
     // napi_status napi_get_value_bool(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_value_bool(napi_env env, napi_value value, [MarshalAs(UnmanagedType.U1)] out bool result);
+    internal static extern napi_status napi_get_value_bool(napi_env env, napi_value value, out sbyte result);
 
     // napi_status napi_get_value_string_latin1(napi_env env, napi_value value,
     //   char* buf, size_t bufsize, size_t* result)
@@ -344,8 +344,7 @@ namespace NApi
 
     // napi_status napi_instanceof(napi_env env, napi_value object, napi_value constructor, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_instanceof(napi_env env, IntPtr @object,
-        IntPtr constructor, bool* result);
+    internal static extern napi_status napi_instanceof(napi_env env, napi_value @object, napi_value constructor, out sbyte result);
 
     // napi_status napi_get_cb_info(
     //     napi_env env,              // [in] NAPI environment handle

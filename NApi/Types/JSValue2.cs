@@ -651,5 +651,11 @@ namespace NApi.Types
       napi_new_instance(Scope.Env, (napi_value)this, (nuint)argc, argv, out napi_value result).ThrowIfFailed(Scope);
       return result;
     }
+
+    public bool InstanceOf(JSValue constructor)
+    {
+      napi_instanceof(Scope.Env, (napi_value)this, (napi_value)constructor, out sbyte result).ThrowIfFailed(Scope);
+      return result != 0;
+    }
   }
 }
