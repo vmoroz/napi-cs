@@ -15,6 +15,8 @@ namespace NApi
     public IntPtr Pointer;
 
     public static implicit operator napi_value(IntPtr value) => new napi_value { Pointer = value };
+
+    public static readonly napi_value Null = new napi_value { Pointer = IntPtr.Zero };
   }
 
   public struct napi_value_ptr
@@ -47,6 +49,28 @@ namespace NApi
   public struct napi_deferred
   {
     public IntPtr Pointer;
+  }
+
+  public struct napi_char_ptr
+  {
+    public IntPtr Pointer;
+
+    public static readonly napi_char_ptr Null = new napi_char_ptr { Pointer = IntPtr.Zero };
+  }
+
+  public unsafe struct napi_property_descriptor
+  {
+    // One of utf8name or name should be NULL.
+    public IntPtr utf8name;
+    public napi_value name;
+
+    public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> method;
+    public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> getter;
+    public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr> setter;
+    public napi_value value;
+
+    public napi_property_attributes attributes;
+    public IntPtr data;
   }
 
   [SuppressUnmanagedCodeSecurity]
@@ -291,8 +315,8 @@ namespace NApi
     // napi_status napi_define_properties(napi_env env, napi_value object,
     //    size_t property_count, const napi_property_descriptor* properties)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_define_properties(napi_env env, IntPtr @object,
-        ulong property_count, IntPtr properties);
+    internal static extern napi_status napi_define_properties(napi_env env, napi_value @object,
+        nuint property_count, napi_property_descriptor* properties);
 
     // napi_status napi_is_array(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -555,8 +579,8 @@ namespace NApi
     // napi_status napi_add_finalizer(napi_env env, napi_value js_object,
     // void* native_object, napi_finalize finalize_cb, void* finalize_hint, napi_ref *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_add_finalizer(napi_env env, IntPtr js_object,
-        IntPtr native_object, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb, IntPtr finalize_hint, IntPtr result);
+    internal static extern napi_status napi_add_finalizer(napi_env env, napi_value js_object,
+        IntPtr native_object, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb, IntPtr finalize_hint, napi_ref* result);
 
     // napi_status napi_create_bigint_int64(napi_env env, int64_t value, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

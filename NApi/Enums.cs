@@ -2,7 +2,7 @@
 
 namespace NApi
 {
-    public enum napi_property_attributes
+    public enum napi_property_attributes : int
     {
         napi_default = 0,
         napi_writable = 1,

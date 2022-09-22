@@ -21,6 +21,67 @@ namespace NApi.Types
 
   public delegate JSValue JSCallback(JSCallbackInfo info);
 
+  [Flags]
+  public enum JSPropertyAttributes : int
+  {
+    Default = 0,
+    Writable = 1,
+    Enumerable = 2,
+    Configurable = 4,
+    Static = 1024,
+    DefaultMethod = Writable | Configurable,
+    DefaultProperty = Writable | Enumerable | Configurable,
+  }
+
+  public class JSPropertyDescriptor
+  {
+    public JSValue Name { get; }
+    public JSCallback? Method { get; } = null;
+    public JSCallback? Getter { get; } = null;
+    public JSCallback? Setter { get; } = null;
+    public JSValue? Value { get; } = null;
+    public JSPropertyAttributes Attributes { get; } = JSPropertyAttributes.Default;
+
+    public JSPropertyDescriptor(JSValue name, JSValue value, JSPropertyAttributes attributes = JSPropertyAttributes.DefaultProperty)
+    {
+      Name = name;
+      Value = value;
+      Attributes = attributes;
+    }
+
+    public JSPropertyDescriptor(string name, JSValue value, JSPropertyAttributes attributes = JSPropertyAttributes.DefaultProperty)
+      : this(JSValue.CreateStringUtf16(name), value, attributes)
+    {
+    }
+
+    public JSPropertyDescriptor(JSValue name, JSCallback method, JSPropertyAttributes attributes = JSPropertyAttributes.DefaultMethod)
+    {
+      Name = name;
+      Method = method;
+      Attributes = attributes;
+    }
+
+    public JSPropertyDescriptor(string name, JSCallback method, JSPropertyAttributes attributes = JSPropertyAttributes.DefaultMethod)
+      : this(JSValue.CreateStringUtf16(name), method, attributes)
+    {
+    }
+
+    public JSPropertyDescriptor(JSValue name, JSCallback? getter, JSCallback? setter, JSPropertyAttributes attributes = JSPropertyAttributes.Configurable)
+    {
+      if (getter == null && setter == null)
+        throw new ArgumentException($"Either `{nameof(getter)}` or `{nameof(setter)}` must be not null");
+      Name = name;
+      Getter = getter;
+      Setter = setter;
+      Attributes = attributes;
+    }
+
+    public JSPropertyDescriptor(string name, JSCallback? getter, JSCallback? setter, JSPropertyAttributes attributes = JSPropertyAttributes.Configurable)
+      : this(JSValue.CreateStringUtf16(name), getter, setter, attributes)
+    {
+    }
+  }
+
   // New class for JSValue
   public class JSValue
   {
@@ -200,7 +261,7 @@ namespace NApi.Types
       GCHandle callbackHandle = GCHandle.Alloc(callback);
       JSValue func = CreateFunction(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle);
       napi_add_finalizer(
-        func.Scope.Env, func.Value.Pointer, (IntPtr)callbackHandle, &FinalizeJSCallback, IntPtr.Zero, IntPtr.Zero).ThrowIfFailed(func.Scope);
+        func.Scope.Env, func.Value.Pointer, (IntPtr)callbackHandle, &FinalizeJSCallback, IntPtr.Zero, null).ThrowIfFailed(func.Scope);
       return func;
     }
 
@@ -409,6 +470,111 @@ namespace NApi.Types
     {
       napi_delete_element(Scope.Env, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed(Scope);
       return result != 0;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static unsafe IntPtr InvokeJSMethod(IntPtr env, IntPtr callbackInfo)
+    {
+      try
+      {
+        using (var scope = new JsScope(new JsEnv(env)))
+        {
+          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
+
+          IntPtr data;
+          napi_get_cb_info(scope.Env, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
+          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(data).Target!;
+          JSValue result = desc.Method!.Invoke(cbInfo);
+          // TODO: implement escapable scope
+          return result.Value.Pointer;
+        }
+      }
+      catch (System.Exception e)
+      {
+        //TODO: record as JS error
+        Console.Error.WriteLine(e);
+        throw;
+      }
+    }
+
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static unsafe IntPtr InvokeJSGetter(IntPtr env, IntPtr callbackInfo)
+    {
+      try
+      {
+        using (var scope = new JsScope(new JsEnv(env)))
+        {
+          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
+
+          IntPtr data;
+          napi_get_cb_info(scope.Env, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
+          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(data).Target!;
+          JSValue result = desc.Getter!.Invoke(cbInfo);
+          // TODO: implement escapable scope
+          return result.Value.Pointer;
+        }
+      }
+      catch (System.Exception e)
+      {
+        //TODO: record as JS error
+        Console.Error.WriteLine(e);
+        throw;
+      }
+    }
+
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static unsafe IntPtr InvokeJSSetter(IntPtr env, IntPtr callbackInfo)
+    {
+      try
+      {
+        using (var scope = new JsScope(new JsEnv(env)))
+        {
+          JSCallbackInfo cbInfo = new JSCallbackInfo(scope, callbackInfo);
+
+          IntPtr data;
+          napi_get_cb_info(scope.Env, callbackInfo, null, IntPtr.Zero, IntPtr.Zero, new IntPtr(&data)).ThrowIfFailed(scope);
+          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(data).Target!;
+          JSValue result = desc.Setter!.Invoke(cbInfo);
+          // TODO: implement escapable scope
+          return result.Value.Pointer;
+        }
+      }
+      catch (System.Exception e)
+      {
+        //TODO: record as JS error
+        Console.Error.WriteLine(e);
+        throw;
+      }
+    }
+
+    public unsafe void DefineProperties(params JSPropertyDescriptor[] descriptors)
+    {
+      int count = descriptors.Length;
+      napi_property_descriptor* descriptorsPtr = stackalloc napi_property_descriptor[count];
+      for (int i = 0; i < count; i++)
+      {
+        JSPropertyDescriptor descriptor = descriptors[i];
+        napi_property_descriptor* descriptorPtr = &descriptorsPtr[i];
+        descriptorPtr->name = (napi_value)descriptor.Name;
+        descriptorPtr->utf8name = IntPtr.Zero;
+        descriptorPtr->method = descriptor.Method != null ? &InvokeJSMethod : null;
+        descriptorPtr->getter = descriptor.Getter != null ? &InvokeJSGetter : null;
+        descriptorPtr->setter = descriptor.Setter != null ? &InvokeJSSetter : null;
+        descriptorPtr->value = descriptor.Value != null ? (napi_value)descriptor.Value : napi_value.Null;
+        descriptorPtr->attributes = (napi_property_attributes)(int)descriptor.Attributes;
+        if (descriptor.Method != null || descriptor.Getter != null || descriptor.Setter != null)
+        {
+          GCHandle descriptorHandle = GCHandle.Alloc(descriptor);
+          napi_add_finalizer(
+            Scope.Env, (napi_value)this, (IntPtr)descriptorHandle, &FinalizeJSCallback, IntPtr.Zero, null).ThrowIfFailed(Scope);
+          descriptorPtr->data = (IntPtr)descriptorHandle;
+        }
+        else
+        {
+          descriptorPtr->data = IntPtr.Zero;
+        }
+      }
+      napi_define_properties(Scope.Env, (napi_value)this, (nuint)count, descriptorsPtr).ThrowIfFailed(Scope);
     }
   }
 }
