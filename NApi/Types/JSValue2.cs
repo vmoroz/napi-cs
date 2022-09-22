@@ -626,5 +626,30 @@ namespace NApi.Types
         (nuint)argc, argv, out napi_value result).ThrowIfFailed(Scope);
       return result;
     }
+
+    public unsafe JSValue CallAsConstructor()
+    {
+      napi_new_instance(Scope.Env, (napi_value)this, 0, null, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue CallAsConstructor(JSValue arg0)
+    {
+      napi_value argValue0 = (napi_value)arg0;
+      napi_new_instance(Scope.Env, (napi_value)this, 1, &argValue0, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
+
+    public unsafe JSValue CallAsConstructor(params JSValue[] args)
+    {
+      int argc = args.Length;
+      napi_value* argv = stackalloc napi_value[argc];
+      for (int i = 0; i < argc; ++i)
+      {
+        argv[i] = (napi_value)args[i];
+      }
+      napi_new_instance(Scope.Env, (napi_value)this, (nuint)argc, argv, out napi_value result).ThrowIfFailed(Scope);
+      return result;
+    }
   }
 }
