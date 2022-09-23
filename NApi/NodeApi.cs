@@ -186,6 +186,12 @@ namespace NApi
     public IntPtr data;
   }
 
+  public struct napi_type_tag
+  {
+    public ulong lower;
+    public ulong upper;
+  }
+
   [SuppressUnmanagedCodeSecurity]
   public unsafe class NodeApi
   {
@@ -609,7 +615,7 @@ namespace NApi
     // size_t byte_length, napi_finalize finalize_cb, void* finalize_hint, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_create_external_arraybuffer(napi_env env,
-        void* external_data, nuint byte_length, delegate *unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
+        void* external_data, nuint byte_length, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
         IntPtr finalize_hint, out napi_value result);
 
     // napi_status napi_get_arraybuffer_info(napi_env env, napi_value arraybuffer,
@@ -751,7 +757,7 @@ namespace NApi
     internal static extern napi_status napi_set_instance_data(
       napi_env env,
       IntPtr data,
-      delegate*unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
+      delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
       IntPtr finalize_hint);
 
     // napi_status napi_get_instance_data(napi_env env, void **data)
@@ -760,23 +766,22 @@ namespace NApi
 
     // napi_status napi_detach_arraybuffer(napi_env env, napi_value arraybuffer)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_detach_arraybuffer(napi_env env, IntPtr arraybuffer);
+    internal static extern napi_status napi_detach_arraybuffer(napi_env env, napi_value arraybuffer);
 
     // napi_status napi_is_detached_arraybuffer(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_detached_arraybuffer(napi_env env, IntPtr value,
-        bool* result);
+    internal static extern napi_status napi_is_detached_arraybuffer(napi_env env, napi_value value,
+        out sbyte result);
 
     // napi_status napi_type_tag_object(napi_env env, napi_value value, const napi_type_tag *type_tag)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_type_tag_object(napi_env env, IntPtr value,
-        IntPtr type_tag);
+    internal static extern napi_status napi_type_tag_object(napi_env env, napi_value value, ref napi_type_tag type_tag);
 
     // napi_status napi_check_object_type_tag(napi_env env, napi_value value,
     // const napi_type_tag* type_tag, bool* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_check_object_type_tag(napi_env env, napi_value value,
-        IntPtr type_tag, bool* result);
+        ref napi_type_tag type_tag, out sbyte result);
 
     // napi_status napi_object_freeze(napi_env env, napi_value object)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

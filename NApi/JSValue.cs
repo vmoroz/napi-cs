@@ -1121,5 +1121,37 @@ namespace NApi
       napi_get_instance_data((napi_env)JSValueScope.Current, out IntPtr data).ThrowIfFailed();
       return (data != IntPtr.Zero) ? GCHandle.FromIntPtr(data).Target : null;
     }
+
+    public void DetachArrayBuffer()
+    {
+      napi_detach_arraybuffer((napi_env)Scope, (napi_value)this).ThrowIfFailed();
+    }
+
+    public bool IsDetachedArrayBuffer()
+    {
+      napi_is_detached_arraybuffer((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      return result != 0;
+    }
+
+    public void SetObjectTypeTag(ref napi_type_tag typeTag)
+    {
+      napi_type_tag_object((napi_env)Scope, (napi_value)this, ref typeTag);
+    }
+
+    public bool CheckObjectTypeTag(ref napi_type_tag typeTag)
+    {
+      napi_check_object_type_tag((napi_env)Scope, (napi_value)this, ref typeTag, out sbyte result);
+      return result != 0;
+    }
+
+    public void FreezeObject()
+    {
+      napi_object_freeze((napi_env)Scope, (napi_value)this).ThrowIfFailed();
+    }
+
+    public void SealObject()
+    {
+      napi_object_seal((napi_env)Scope, (napi_value)this).ThrowIfFailed();
+    }
   }
 }
