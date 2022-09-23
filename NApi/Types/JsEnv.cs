@@ -1,21 +1,14 @@
-﻿using System;
-
-namespace NApi.Types
+﻿namespace NApi.Types
 {
   public sealed class JsEnv
   {
-    internal IntPtr EnvPtr { get; }
+    private napi_env _env;
 
-    internal JsEnv(IntPtr envPtr)
+    public JsEnv(napi_env env)
     {
-      EnvPtr = envPtr;
+      _env = env;
     }
 
-    public static JsEnv FromPointer(IntPtr envPtr)
-    {
-      return new(envPtr);
-    }
-
-    public static implicit operator napi_env(JsEnv value) => new napi_env { Pointer = value.EnvPtr };
+    public static explicit operator napi_env(JsEnv env) => (napi_env)env._env;
   }
 }

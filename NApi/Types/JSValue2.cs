@@ -27,26 +27,26 @@ namespace NApi.Types
 
     public JSValue GetNewTarget()
     {
-      napi_get_new_target(Scope.Env, CallbackInfo, out napi_value result).ThrowIfFailed(Scope);
+      napi_get_new_target((napi_env)Scope, CallbackInfo, out napi_value result).ThrowIfFailed();
       return result;
     }
 
-    internal JsScope Scope { get; }
+    internal JSValueScope Scope { get; }
 
     internal napi_callback_info CallbackInfo { get; }
 
-    public JSCallbackArgs(JsScope scope, napi_callback_info callbackInfo)
+    public JSCallbackArgs(JSValueScope scope, napi_callback_info callbackInfo)
     {
       Scope = scope;
       CallbackInfo = callbackInfo;
       unsafe
       {
         nuint argc = 0;
-        napi_get_cb_info(scope.Env, callbackInfo, &argc, null, null, IntPtr.Zero).ThrowIfFailed(scope);
+        napi_get_cb_info((napi_env)scope, callbackInfo, &argc, null, null, IntPtr.Zero).ThrowIfFailed();
         napi_value* argv = stackalloc napi_value[(int)argc];
         napi_value thisArg;
         IntPtr data;
-        napi_get_cb_info(scope.Env, callbackInfo, &argc, argv, &thisArg, new IntPtr(&data)).ThrowIfFailed(scope);
+        napi_get_cb_info((napi_env)scope, callbackInfo, &argc, argv, &thisArg, new IntPtr(&data)).ThrowIfFailed();
 
         _args = new JSValue[(int)argc];
         for (int i = 0; i < (int)argc; ++i)
@@ -126,11 +126,11 @@ namespace NApi.Types
   // New class for JSValue
   public class JSValue
   {
-    internal JsScope Scope { get; }
+    internal JSValueScope Scope { get; }
 
     internal napi_value Value { get; }
 
-    public JSValue(JsScope scope, napi_value value)
+    public JSValue(JSValueScope scope, napi_value value)
     {
       Scope = scope;
       Value = value;
@@ -138,13 +138,13 @@ namespace NApi.Types
 
     public JSValue(napi_value value)
     {
-      Scope = JsScope.Current ?? throw new InvalidOperationException("No current scope");
+      Scope = JSValueScope.Current ?? throw new InvalidOperationException("No current scope");
       Value = value;
     }
 
-    private static JsScope GetScope()
+    private static JSValueScope GetScope()
     {
-      JsScope? scope = JsScope.Current;
+      JSValueScope? scope = JSValueScope.Current;
       if (scope == null)
         throw new InvalidOperationException("Scope is null");
       return scope;
@@ -152,10 +152,10 @@ namespace NApi.Types
 
     private static unsafe JSValue CreateJSValue(Func<napi_env, napi_value_ptr, napi_status> creator)
     {
-      JsScope scope = GetScope();
+      JSValueScope scope = GetScope();
       napi_value value;
       napi_value_ptr valuePtr = new napi_value_ptr { Pointer = new IntPtr(&value) };
-      creator(scope.Env, valuePtr).ThrowIfFailed(scope);
+      creator((napi_env)scope, valuePtr).ThrowIfFailed();
       return new JSValue(scope, value);
     }
 
@@ -271,13 +271,12 @@ namespace NApi.Types
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env.Pointer)))
+        using (var scope = new JSEscapableValueScope(new JsEnv(env)))
         {
           JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
           JSCallback callback = (JSCallback)GCHandle.FromIntPtr(args.Data).Target!;
           JSValue result = callback(args);
-          // TODO: implement escapable scope
-          return result.Value;
+          return (napi_value)scope.Escape(result);
         }
       }
       catch (System.Exception e)
@@ -298,7 +297,7 @@ namespace NApi.Types
     {
       if (handle != IntPtr.Zero)
       {
-        napi_add_finalizer(Scope.Env, (napi_value)this, handle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed(Scope);
+        napi_add_finalizer((napi_env)Scope, (napi_value)this, handle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed();
       }
     }
 
@@ -336,33 +335,33 @@ namespace NApi.Types
     public unsafe JSValueType TypeOf()
     {
       JSValueType result;
-      napi_typeof(Scope.Env, Value, &result).ThrowIfFailed(Scope);
+      napi_typeof((napi_env)Scope, Value, &result).ThrowIfFailed();
       return result;
     }
 
     public bool TryGetValue(out double value)
     {
-      return napi_get_value_double(Scope.Env, Value, out value) == napi_status.napi_ok;
+      return napi_get_value_double((napi_env)Scope, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out int value)
     {
-      return napi_get_value_int32(Scope.Env, Value, out value) == napi_status.napi_ok;
+      return napi_get_value_int32((napi_env)Scope, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out uint value)
     {
-      return napi_get_value_uint32(Scope.Env, Value, out value) == napi_status.napi_ok;
+      return napi_get_value_uint32((napi_env)Scope, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out long value)
     {
-      return napi_get_value_int64(Scope.Env, Value, out value) == napi_status.napi_ok;
+      return napi_get_value_int64((napi_env)Scope, Value, out value) == napi_status.napi_ok;
     }
 
     public bool TryGetValue(out bool value)
     {
-      napi_status status = napi_get_value_bool(Scope.Env, Value, out sbyte result);
+      napi_status status = napi_get_value_bool((napi_env)Scope, Value, out sbyte result);
       value = result != 0;
       return status == napi_status.napi_ok;
     }
@@ -372,7 +371,7 @@ namespace NApi.Types
       // TODO: add check that the object is still alive
       // TODO: should we check value type first?
       nuint length;
-      if (napi_get_value_string_utf16(Scope.Env, Value, null, 0, &length) != napi_status.napi_ok)
+      if (napi_get_value_string_utf16((napi_env)Scope, Value, null, 0, &length) != napi_status.napi_ok)
       {
         value = string.Empty;
         return false;
@@ -381,7 +380,7 @@ namespace NApi.Types
       char[] buf = new char[length + 1];
       fixed (char* bufStart = &buf[0])
       {
-        napi_get_value_string_utf16(Scope.Env, Value, bufStart, (nuint)buf.Length, null).ThrowIfFailed(Scope);
+        napi_get_value_string_utf16((napi_env)Scope, Value, bufStart, (nuint)buf.Length, null).ThrowIfFailed();
         value = new string(buf);
         return true;
       }
@@ -411,111 +410,111 @@ namespace NApi.Types
     public JSValue CoerceToBoolean()
     {
       napi_value result;
-      napi_coerce_to_bool(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      napi_coerce_to_bool((napi_env)Scope, (napi_value)this, out result).ThrowIfFailed();
       return result;
     }
 
     public JSValue CoerceToNumber()
     {
       napi_value result;
-      napi_coerce_to_number(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      napi_coerce_to_number((napi_env)Scope, (napi_value)this, out result).ThrowIfFailed();
       return result;
     }
 
     public JSValue CoerceToObject()
     {
       napi_value result;
-      napi_coerce_to_object(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      napi_coerce_to_object((napi_env)Scope, (napi_value)this, out result).ThrowIfFailed();
       return result;
     }
 
     public JSValue CoerceToString()
     {
       napi_value result;
-      napi_coerce_to_string(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      napi_coerce_to_string((napi_env)Scope, (napi_value)this, out result).ThrowIfFailed();
       return result;
     }
 
     public JSValue GetPrototype()
     {
       napi_value result;
-      napi_get_prototype(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      napi_get_prototype((napi_env)Scope, (napi_value)this, out result).ThrowIfFailed();
       return result;
     }
 
     public JSValue GetPropertyNames()
     {
       napi_value result;
-      napi_get_property_names(Scope.Env, (napi_value)this, out result).ThrowIfFailed(Scope);
+      napi_get_property_names((napi_env)Scope, (napi_value)this, out result).ThrowIfFailed();
       return result;
     }
 
     public void SetProperty(JSValue key, JSValue value)
     {
-      napi_set_property(Scope.Env, (napi_value)this, (napi_value)key, (napi_value)value).ThrowIfFailed(Scope);
+      napi_set_property((napi_env)Scope, (napi_value)this, (napi_value)key, (napi_value)value).ThrowIfFailed();
     }
 
     public bool HasProperty(JSValue key)
     {
-      napi_has_property(Scope.Env, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed(Scope);
+      napi_has_property((napi_env)Scope, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
     public JSValue GetProperty(JSValue key)
     {
-      napi_get_property(Scope.Env, (napi_value)this, (napi_value)key, out napi_value result).ThrowIfFailed(Scope);
+      napi_get_property((napi_env)Scope, (napi_value)this, (napi_value)key, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public bool DeleteProperty(JSValue key)
     {
-      napi_delete_property(Scope.Env, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed(Scope);
+      napi_delete_property((napi_env)Scope, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
     public bool HasOwnProperty(JSValue key)
     {
-      napi_has_own_property(Scope.Env, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed(Scope);
+      napi_has_own_property((napi_env)Scope, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
     public void SetProperty(string name, JSValue value)
     {
-      napi_set_named_property(Scope.Env, (napi_value)this, name, (napi_value)value).ThrowIfFailed(Scope);
+      napi_set_named_property((napi_env)Scope, (napi_value)this, name, (napi_value)value).ThrowIfFailed();
     }
 
     public bool HasProperty(string name)
     {
-      napi_has_named_property(Scope.Env, (napi_value)this, name, out sbyte result).ThrowIfFailed(Scope);
+      napi_has_named_property((napi_env)Scope, (napi_value)this, name, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
     public JSValue GetProperty(string name)
     {
-      napi_get_named_property(Scope.Env, (napi_value)this, name, out napi_value result).ThrowIfFailed(Scope);
+      napi_get_named_property((napi_env)Scope, (napi_value)this, name, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public void SetElement(int index, JSValue value)
     {
-      napi_set_element(Scope.Env, (napi_value)this, (uint)index, (napi_value)value).ThrowIfFailed(Scope);
+      napi_set_element((napi_env)Scope, (napi_value)this, (uint)index, (napi_value)value).ThrowIfFailed();
     }
 
     public bool HasElement(int index)
     {
-      napi_has_element(Scope.Env, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed(Scope);
+      napi_has_element((napi_env)Scope, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
     public JSValue GetElement(int index)
     {
-      napi_get_element(Scope.Env, (napi_value)this, (uint)index, out napi_value result).ThrowIfFailed(Scope);
+      napi_get_element((napi_env)Scope, (napi_value)this, (uint)index, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public bool DeleteElement(int index)
     {
-      napi_delete_element(Scope.Env, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed(Scope);
+      napi_delete_element((napi_env)Scope, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -524,13 +523,12 @@ namespace NApi.Types
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env.Pointer)))
+        using (var scope = new JSEscapableValueScope(new JsEnv(env)))
         {
           JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
           JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
           JSValue result = desc.Method!.Invoke(args);
-          // TODO: implement escapable scope
-          return result.Value;
+          return (napi_value)scope.Escape(result);
         }
       }
       catch (System.Exception e)
@@ -546,13 +544,12 @@ namespace NApi.Types
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env.Pointer)))
+        using (var scope = new JSEscapableValueScope(new JsEnv(env)))
         {
           JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
           JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
           JSValue result = desc.Getter!.Invoke(args);
-          // TODO: implement escapable scope
-          return result.Value;
+          return (napi_value)scope.Escape(result);
         }
       }
       catch (System.Exception e)
@@ -568,13 +565,12 @@ namespace NApi.Types
     {
       try
       {
-        using (var scope = new JsScope(new JsEnv(env.Pointer)))
+        using (var scope = new JSEscapableValueScope(new JsEnv(env)))
         {
           JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
           JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
           JSValue result = desc.Setter!.Invoke(args);
-          // TODO: implement escapable scope
-          return result.Value.Pointer;
+          return (napi_value)scope.Escape(result);
         }
       }
       catch (System.Exception e)
@@ -619,44 +615,44 @@ namespace NApi.Types
     public unsafe void DefineProperties(params JSPropertyDescriptor[] descriptors)
     {
       IntPtr[] handles = ToUnmanagedPropertyDescriptors(descriptors, (count, descriptorsPtr) =>
-        napi_define_properties(Scope.Env, (napi_value)this, count, descriptorsPtr).ThrowIfFailed(Scope));
+        napi_define_properties((napi_env)Scope, (napi_value)this, count, descriptorsPtr).ThrowIfFailed());
       Array.ForEach(handles, handle => AddHandleFinalizer(handle));
     }
 
     public bool IsArray()
     {
-      napi_is_array(Scope.Env, (napi_value)this, out sbyte result).ThrowIfFailed(Scope);
+      napi_is_array((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
     public int GetLength()
     {
-      napi_get_array_length(Scope.Env, (napi_value)this, out uint result).ThrowIfFailed(Scope);
+      napi_get_array_length((napi_env)Scope, (napi_value)this, out uint result).ThrowIfFailed();
       return (int)result;
     }
 
     public bool StrictEquals(JSValue other)
     {
-      napi_strict_equals(Scope.Env, (napi_value)this, (napi_value)other, out sbyte result);
+      napi_strict_equals((napi_env)Scope, (napi_value)this, (napi_value)other, out sbyte result);
       return result != 0;
     }
 
     public unsafe JSValue Call()
     {
-      napi_call_function(Scope.Env, (napi_value)GetUndefined(), (napi_value)this, 0, null, out napi_value result).ThrowIfFailed(Scope);
+      napi_call_function((napi_env)Scope, (napi_value)GetUndefined(), (napi_value)this, 0, null, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public unsafe JSValue Call(JSValue thisArg)
     {
-      napi_call_function(Scope.Env, (napi_value)thisArg, (napi_value)this, 0, null, out napi_value result).ThrowIfFailed(Scope);
+      napi_call_function((napi_env)Scope, (napi_value)thisArg, (napi_value)this, 0, null, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public unsafe JSValue Call(JSValue thisArg, JSValue arg0)
     {
       napi_value argValue0 = (napi_value)arg0;
-      napi_call_function(Scope.Env, (napi_value)thisArg, (napi_value)this, 1, &argValue0, out napi_value result).ThrowIfFailed(Scope);
+      napi_call_function((napi_env)Scope, (napi_value)thisArg, (napi_value)this, 1, &argValue0, out napi_value result).ThrowIfFailed();
       return result;
     }
 
@@ -668,21 +664,21 @@ namespace NApi.Types
       {
         argv[i] = (napi_value)args[i];
       }
-      napi_call_function(Scope.Env, (napi_value)thisArg, (napi_value)this,
-        (nuint)argc, argv, out napi_value result).ThrowIfFailed(Scope);
+      napi_call_function((napi_env)Scope, (napi_value)thisArg, (napi_value)this,
+        (nuint)argc, argv, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public unsafe JSValue CallAsConstructor()
     {
-      napi_new_instance(Scope.Env, (napi_value)this, 0, null, out napi_value result).ThrowIfFailed(Scope);
+      napi_new_instance((napi_env)Scope, (napi_value)this, 0, null, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public unsafe JSValue CallAsConstructor(JSValue arg0)
     {
       napi_value argValue0 = (napi_value)arg0;
-      napi_new_instance(Scope.Env, (napi_value)this, 1, &argValue0, out napi_value result).ThrowIfFailed(Scope);
+      napi_new_instance((napi_env)Scope, (napi_value)this, 1, &argValue0, out napi_value result).ThrowIfFailed();
       return result;
     }
 
@@ -694,13 +690,13 @@ namespace NApi.Types
       {
         argv[i] = (napi_value)args[i];
       }
-      napi_new_instance(Scope.Env, (napi_value)this, (nuint)argc, argv, out napi_value result).ThrowIfFailed(Scope);
+      napi_new_instance((napi_env)Scope, (napi_value)this, (nuint)argc, argv, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public bool InstanceOf(JSValue constructor)
     {
-      napi_instanceof(Scope.Env, (napi_value)this, (napi_value)constructor, out sbyte result).ThrowIfFailed(Scope);
+      napi_instanceof((napi_env)Scope, (napi_value)this, (napi_value)constructor, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -711,8 +707,8 @@ namespace NApi.Types
       nuint count,
       napi_property_descriptor* descriptors)
     {
-      JsScope scope = JsScope.EnsureCurrent();
-      napi_define_class((napi_env)scope, utf8Name.Pin().Pointer, (nuint)utf8Name.Length, callback, data, count, descriptors, out napi_value result).ThrowIfFailed(scope);
+      napi_define_class((napi_env)JSValueScope.Current, utf8Name.Pin().Pointer, (nuint)utf8Name.Length,
+        callback, data, count, descriptors, out napi_value result).ThrowIfFailed();
       return result;
     }
 
@@ -736,44 +732,43 @@ namespace NApi.Types
     public unsafe void Wrap(object value)
     {
       GCHandle valueHandle = GCHandle.Alloc(value);
-      napi_wrap((napi_env)Scope, (napi_value)this, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed(Scope);
+      napi_wrap((napi_env)Scope, (napi_value)this, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed();
     }
 
     public object Unwrap()
     {
-      napi_unwrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
+      napi_unwrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed();
       GCHandle handle = GCHandle.FromIntPtr(result);
       return handle.Target!;
     }
 
     public object RemoveWrap()
     {
-      napi_remove_wrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
+      napi_remove_wrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed();
       return GCHandle.FromIntPtr(result).Target!;
     }
 
     public static unsafe JSValue CreateExternal(object value)
     {
-      JsScope scope = JsScope.EnsureCurrent();
       GCHandle valueHandle = GCHandle.Alloc(value);
-      napi_create_external((napi_env)scope, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, out napi_value result).ThrowIfFailed(scope);
+      napi_create_external((napi_env)JSValueScope.Current, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public unsafe object GetExternalValue()
     {
-      napi_get_value_external((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed(Scope);
+      napi_get_value_external((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed();
       return GCHandle.FromIntPtr(result).Target!;
     }
 
     public JSReference CreateReference()
     {
-      return new JSReference(Scope.Env, (napi_value)this);
+      return new JSReference(Scope.Environment, this);
     }
 
     public JSReference CreateWeakReference()
     {
-      return new JSReference(Scope.Env, (napi_value)this, isWeak: true);
+      return new JSReference(Scope.Environment, this, isWeak: true);
     }
   }
 }

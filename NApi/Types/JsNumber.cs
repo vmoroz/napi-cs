@@ -5,21 +5,21 @@ namespace NApi.Types
 {
   public sealed class JsNumber : JsValue
   {
-    internal JsNumber(JsScope scope, IntPtr valuePtr) : base(scope, valuePtr)
+    internal JsNumber(JSValueScope scope, IntPtr valuePtr) : base(scope, valuePtr)
     {
     }
 
-    public static unsafe JsNumber Create(JsScope scope, double value)
+    public static unsafe JsNumber Create(JSValueScope scope, double value)
     {
       IntPtr valuePtr = new IntPtr();
-      napi_create_double(scope.Env, value, new napi_value_ptr { Pointer = new IntPtr(&valuePtr) }).ThrowIfFailed(scope);
+      napi_create_double((napi_env)scope, value, new napi_value_ptr { Pointer = new IntPtr(&valuePtr) }).ThrowIfFailed();
       return new JsNumber(scope, valuePtr);
     }
 
     public double ToDouble()
     {
       double result;
-      napi_get_value_double(Scope.Env, new napi_value { Pointer = ValuePtr }, out result).ThrowIfFailed(Scope);
+      napi_get_value_double((napi_env)Scope, new napi_value { Pointer = ValuePtr }, out result).ThrowIfFailed();
       return result;
     }
   }

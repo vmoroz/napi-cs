@@ -3,13 +3,14 @@ using NApi.Attributes;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using NApi;
 
 namespace Example
 {
-  public class Example
+    public class Example
   {
     [ModuleExports]
-    public static void ModuleExports(JsScope scope, JsObject exports)
+    public static void ModuleExports(JSValueScope scope, JsObject exports)
     {
       //exports.Set(JSValue.CreateStringUtf16("plus"), JSValue.CreateFunction("plus", (scope, @this, args) => JsNumber.Create(scope, ((JsNumber)args[0]).ToDouble() + ((JsNumber)args[1]).ToDouble())));
       //exports.Set(JsString.Create(scope, "helloPlusWorld"), JsFunction.Create(scope, "helloPlusWorld", (scope, @this, args) => JsString.Create(scope, ((JsString)args[0]).ToString() + " world")));

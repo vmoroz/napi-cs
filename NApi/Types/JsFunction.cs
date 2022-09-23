@@ -8,7 +8,7 @@ namespace NApi.Types
     private static IntPtr? NApiCallbackPtr;
     private static GCHandle? NApiCallbackHandle;
 
-    internal JsFunction(JsScope scope, IntPtr valuePtr) : base(scope, valuePtr)
+    internal JsFunction(JSValueScope scope, IntPtr valuePtr) : base(scope, valuePtr)
     {
     }
 
@@ -34,7 +34,7 @@ namespace NApi.Types
     //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     //private delegate IntPtr napi_callback(IntPtr envPtr, IntPtr infoPtr);
 
-    public delegate JsValue user_callback(JsScope scope, JsValue @this, JsValue[] args);
+    public delegate JsValue user_callback(JSValueScope scope, JsValue @this, JsValue[] args);
 
   //  private static unsafe IntPtr NapiCallback(IntPtr envPtr, IntPtr infoPtr)
   //  {

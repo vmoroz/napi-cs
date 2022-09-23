@@ -7,7 +7,7 @@ namespace NApi.Types
 {
   public abstract class JsValue
   {
-    public JsScope Scope { get; }
+    public JSValueScope Scope { get; }
 
     public IntPtr ValuePtr { get; }
 
@@ -16,14 +16,14 @@ namespace NApi.Types
     private static GCHandle? NApiFinalizeCallbackHandle;
     private static IntPtr? NApiFinalizeCallbackPtr;
 
-    protected internal JsValue(JsScope scope, IntPtr valuePtr)
+    protected internal JsValue(JSValueScope scope, IntPtr valuePtr)
     {
-      scope.EnsureNotDisposed();
+      scope.EnsureIsValid();
       Scope = scope;
       ValuePtr = valuePtr;
     }
 
-    internal static JsValue Create(JsScope scope, IntPtr valuePtr)
+    internal static JsValue Create(JSValueScope scope, IntPtr valuePtr)
     {
       var valueType = Typeof(scope, valuePtr);
       return valueType switch
@@ -42,10 +42,10 @@ namespace NApi.Types
       };
     }
 
-    private static unsafe JSValueType Typeof(JsScope scope, IntPtr valuePtr)
+    private static unsafe JSValueType Typeof(JSValueScope scope, IntPtr valuePtr)
     {
       JSValueType valueType;
-      napi_typeof(scope.Env, new napi_value { Pointer = valuePtr }, &valueType).ThrowIfFailed(scope);
+      napi_typeof((napi_env)scope, new napi_value { Pointer = valuePtr }, &valueType).ThrowIfFailed();
       return valueType;
     }
 

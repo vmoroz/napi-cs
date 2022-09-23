@@ -13,9 +13,9 @@ namespace NApi
 
     public bool IsWeak { get; }
 
-    public JSReference(JsEnv env, napi_value value, bool isWeak = false) : base(IntPtr.Zero, true)
+    public JSReference(JsEnv env, JSValue value, bool isWeak = false) : base(IntPtr.Zero, true)
     {
-      napi_create_reference((napi_env)env, value, isWeak ? 0u : 1u, out napi_ref handle).ThrowIfFailed();
+      napi_create_reference((napi_env)env, (napi_value)value, isWeak ? 0u : 1u, out napi_ref handle).ThrowIfFailed();
       Environment = env;
       SetHandle((IntPtr)handle);
       IsWeak = isWeak;

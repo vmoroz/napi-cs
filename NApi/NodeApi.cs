@@ -7,7 +7,13 @@ namespace NApi
 {
   public struct napi_env
   {
-    public IntPtr Pointer;
+    private IntPtr _handle;
+
+    public napi_env(IntPtr handle) { _handle = handle; }
+
+    public static explicit operator IntPtr(napi_env env) => env._handle;
+    public static explicit operator napi_env(IntPtr handle) => new napi_env(handle);
+
   }
 
   public struct napi_value
@@ -40,12 +46,22 @@ namespace NApi
 
   public struct napi_handle_scope
   {
-    public IntPtr Pointer;
+    private IntPtr _handle;
+
+    public napi_handle_scope(IntPtr handle) { _handle = handle; }
+
+    public static explicit operator IntPtr(napi_handle_scope scope) => scope._handle;
+    public static explicit operator napi_handle_scope(IntPtr handle) => new napi_handle_scope(handle);
   }
 
   public struct napi_escapable_handle_scope
   {
-    public IntPtr Pointer;
+    private IntPtr _handle;
+
+    public napi_escapable_handle_scope(IntPtr handle) { _handle = handle; }
+
+    public static explicit operator IntPtr(napi_escapable_handle_scope scope) => scope._handle;
+    public static explicit operator napi_escapable_handle_scope(IntPtr handle) => new napi_escapable_handle_scope(handle);
   }
 
   public struct napi_callback_info
@@ -439,25 +455,25 @@ namespace NApi
 
     // napi_status napi_open_handle_scope(napi_env env, napi_handle_scope* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_open_handle_scope(napi_env env, IntPtr result);
+    internal static extern napi_status napi_open_handle_scope(napi_env env, out napi_handle_scope result);
 
     // napi_status napi_close_handle_scope(napi_env env, napi_handle_scope scope)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_close_handle_scope(napi_env env, IntPtr scope);
+    internal static extern napi_status napi_close_handle_scope(napi_env env, napi_handle_scope scope);
 
     // napi_status napi_open_escapable_handle_scope(napi_env env, napi_escapable_handle_scope *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_open_escapable_handle_scope(napi_env env, IntPtr result);
+    internal static extern napi_status napi_open_escapable_handle_scope(napi_env env, out napi_escapable_handle_scope result);
 
     // napi_status napi_close_escapable_handle_scope(napi_env env, napi_escapable_handle_scope scope)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_close_escapable_handle_scope(napi_env env, IntPtr scope);
+    internal static extern napi_status napi_close_escapable_handle_scope(napi_env env, napi_escapable_handle_scope scope);
 
     // napi_status napi_escape_handle(napi_env env, napi_escapable_handle_scope scope,
     // napi_value escapee, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_escape_handle(napi_env env, IntPtr scope,
-        IntPtr escapee, IntPtr result);
+    internal static extern napi_status napi_escape_handle(napi_env env, napi_escapable_handle_scope scope,
+        napi_value escapee, out napi_value result);
 
     // napi_status napi_throw(napi_env env, napi_value error)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
