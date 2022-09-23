@@ -648,18 +648,18 @@ namespace NApi
     // napi_status napi_create_dataview(napi_env env, size_t length,
     // napi_value arraybuffer, size_t byte_offset, napi_value* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_create_dataview(napi_env env, ulong length,
-        IntPtr arraybuffer, ulong byte_offset, IntPtr result);
+    internal static extern napi_status napi_create_dataview(napi_env env, nuint length,
+        napi_value arraybuffer, nuint byte_offset, out napi_value result);
 
     // napi_status napi_is_dataview(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_dataview(napi_env env, IntPtr value, bool* result);
+    internal static extern napi_status napi_is_dataview(napi_env env, napi_value value, out sbyte result);
 
     // napi_status napi_get_dataview_info(napi_env env, napi_value dataview,
     // size_t* bytelength, void** data, napi_value *arraybuffer, size_t* byte_offset)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_dataview_info(napi_env env, IntPtr dataview,
-        ulong* bytelength, void** data, IntPtr arraybuffer, ulong* byte_offset);
+    internal static extern napi_status napi_get_dataview_info(napi_env env, napi_value dataview,
+        out nuint bytelength, out void* data, out napi_value arraybuffer, out nuint byte_offset);
 
     // napi_status napi_get_version(napi_env env, uint32_t *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -672,13 +672,11 @@ namespace NApi
 
     // napi_status napi_resolve_deferred(napi_env env, napi_deferred deferred, napi_value resolution)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_resolve_deferred(napi_env env, IntPtr deferred,
-        IntPtr resolution);
+    internal static extern napi_status napi_resolve_deferred(napi_env env, IntPtr deferred, IntPtr resolution);
 
     // napi_status napi_reject_deferred(napi_env env, napi_deferred deferred, napi_value rejection)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_reject_deferred(napi_env env, IntPtr deferred,
-        IntPtr rejection);
+    internal static extern napi_status napi_reject_deferred(napi_env env, IntPtr deferred, IntPtr rejection);
 
     // napi_status napi_is_promise(napi_env env, napi_value value, bool *is_promise)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -690,8 +688,7 @@ namespace NApi
 
     // napi_status napi_adjust_external_memory(napi_env env, int64_t change_in_bytes, int64_t *adjusted_value)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_adjust_external_memory(napi_env env, long change_in_bytes,
-        long* adjusted_value);
+    internal static extern napi_status napi_adjust_external_memory(napi_env env, long change_in_bytes, long* adjusted_value);
 
     // napi_status napi_create_date(napi_env env, double time, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

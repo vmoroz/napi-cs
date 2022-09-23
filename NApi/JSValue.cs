@@ -925,5 +925,31 @@ namespace NApi
       arrayBuffer = arrayBuffer_;
       byteOffset = (int)byteOffset_;
     }
+
+    public static JSValue CreateDataView(int length, JSValue arrayBuffer, int byteOffset)
+    {
+      napi_create_dataview((napi_env)JSValueScope.Current, (nuint)length, (napi_value)arrayBuffer, (nuint)byteOffset, out napi_value result);
+      return result;
+    }
+
+    public bool IsDataView()
+    {
+      napi_is_dataview((napi_env)Scope, (napi_value)this, out sbyte result);
+      return result != 0;
+    }
+
+    public unsafe void GetDataViewInfo(out ReadOnlySpan<byte> viewSpan, out JSValue arrayBuffer, out int byteOffset)
+    {
+      napi_get_dataview_info(
+        (napi_env)Scope,
+        (napi_value)this,
+        out nuint byteLength,
+        out void* data,
+        out napi_value arrayBuffer_,
+        out nuint byteOffset_);
+      viewSpan = new ReadOnlySpan<byte>(data, (int)byteLength);
+      arrayBuffer = arrayBuffer_;
+      byteOffset = (int)byteOffset_;
+    }
   }
 }
