@@ -424,20 +424,108 @@ namespace NApi
 
     //TODO: add more string functions
 
-    //TODO: implement in future
-    //public static explicit operator double(JSValue value)
-    //{
-    //  double result;
-    //  return value.TryGetValue(out result) ? result : 0.0;
-    //}
+    public static implicit operator JSValue(bool value) => GetBoolean(value);
+    public static implicit operator JSValue(sbyte value) => CreateNumber(value);
+    public static implicit operator JSValue(byte value) => CreateNumber(value);
+    public static implicit operator JSValue(short value) => CreateNumber(value);
+    public static implicit operator JSValue(ushort value) => CreateNumber(value);
+    public static implicit operator JSValue(int value) => CreateNumber(value);
+    public static implicit operator JSValue(uint value) => CreateNumber(value);
+    public static implicit operator JSValue(long value) => CreateNumber(value);
+    public static implicit operator JSValue(ulong value) => CreateNumber(value);
+    public static implicit operator JSValue(float value) => CreateNumber(value);
+    public static implicit operator JSValue(double value) => CreateNumber(value);
+    public static implicit operator JSValue(string value) => CreateStringUtf16(value);
 
-    //public static implicit operator JSValue(double value) => CreateNumber(value);
+    public static explicit operator bool(JSValue value)
+    {
+      if (!value.TryGetValue(out bool result))
+        throw new InvalidOperationException("Cannot get bool value");
+      return result;
+    }
 
-    //public JSValue this[string name]
-    //{
-    //  get { return GetProperty(name); }
-    //  set { SetProperty(name, value); }
-    //}
+    public static explicit operator sbyte(JSValue value)
+    {
+      if (!value.TryGetValue(out int result))
+        throw new InvalidOperationException("Cannot get int value");
+      return (sbyte)result;
+    }
+
+    public static explicit operator byte(JSValue value)
+    {
+      if (!value.TryGetValue(out uint result))
+        throw new InvalidOperationException("Cannot get int value");
+      return (byte)result;
+    }
+
+    public static explicit operator short(JSValue value)
+    {
+      if (!value.TryGetValue(out int result))
+        throw new InvalidOperationException("Cannot get int value");
+      return (short)result;
+    }
+
+    public static explicit operator ushort(JSValue value)
+    {
+      if (!value.TryGetValue(out uint result))
+        throw new InvalidOperationException("Cannot get int value");
+      return (ushort)result;
+    }
+
+    public static explicit operator int(JSValue value)
+    {
+      if (!value.TryGetValue(out int result))
+        throw new InvalidOperationException("Cannot get int value");
+      return result;
+    }
+
+    public static explicit operator uint(JSValue value)
+    {
+      if (!value.TryGetValue(out uint result))
+        throw new InvalidOperationException("Cannot get int value");
+      return result;
+    }
+
+    public static explicit operator long(JSValue value)
+    {
+      if (!value.TryGetValue(out long result))
+        throw new InvalidOperationException("Cannot get int value");
+      return result;
+    }
+
+    public static explicit operator ulong(JSValue value)
+    {
+      if (!value.TryGetValue(out long result))
+        throw new InvalidOperationException("Cannot get int value");
+      return (ulong)result;
+    }
+
+    public static explicit operator float(JSValue value)
+    {
+      if (!value.TryGetValue(out double result))
+        throw new InvalidOperationException("Cannot get int value");
+      return (float)result;
+    }
+
+    public static explicit operator double(JSValue value)
+    {
+      if (!value.TryGetValue(out double result))
+        throw new InvalidOperationException("Cannot get int value");
+      return result;
+    }
+
+    public static explicit operator string(JSValue value)
+    {
+      if (!value.TryGetValue(out string result))
+        throw new InvalidOperationException("Cannot get int value");
+      return result;
+    }
+
+    public JSValue this[string name]
+    {
+      get { return GetProperty(name); }
+      set { SetProperty(name, value); }
+    }
 
     public static explicit operator napi_value(JSValue value) => value.Value;
 
