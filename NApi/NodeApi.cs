@@ -567,7 +567,7 @@ namespace NApi
 
     // napi_status napi_throw(napi_env env, napi_value error)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_throw(napi_env env, IntPtr error);
+    internal static extern napi_status napi_throw(napi_env env, napi_value error);
 
     // napi_status napi_throw_error(napi_env env, const char *code, const char *msg)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -586,11 +586,11 @@ namespace NApi
 
     // napi_status napi_is_error(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_error(napi_env env, IntPtr value, bool* result);
+    internal static extern napi_status napi_is_error(napi_env env, napi_value value, out sbyte result);
 
     // napi_status napi_is_exception_pending(napi_env env, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_exception_pending(napi_env env, bool* result);
+    internal static extern napi_status napi_is_exception_pending(napi_env env, out sbyte result);
 
     // napi_status napi_get_and_clear_last_exception(napi_env env, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
