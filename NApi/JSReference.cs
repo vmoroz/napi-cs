@@ -1,5 +1,4 @@
-﻿using NApi.Types;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using static NApi.NodeApi;
 
@@ -7,13 +6,13 @@ namespace NApi
 {
   public class JSReference : SafeHandle
   {
-    public JsEnv Environment { get; }
+    public JSEnvironment Environment { get; }
 
     public napi_ref Handle { get { return new napi_ref(handle); } }
 
     public bool IsWeak { get; }
 
-    public JSReference(JsEnv env, JSValue value, bool isWeak = false) : base(IntPtr.Zero, true)
+    public JSReference(JSEnvironment env, JSValue value, bool isWeak = false) : base(IntPtr.Zero, true)
     {
       napi_create_reference((napi_env)env, (napi_value)value, isWeak ? 0u : 1u, out napi_ref handle).ThrowIfFailed();
       Environment = env;

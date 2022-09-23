@@ -1,4 +1,3 @@
-using NApi.Types;
 using System;
 using static NApi.NodeApi;
 
@@ -8,7 +7,7 @@ namespace NApi
   {
     public napi_handle_scope Handle => (napi_handle_scope)handle;
 
-    public JSSimpleValueScope(JsEnv env) : base(env)
+    public JSSimpleValueScope(JSEnvironment env) : base(env)
     {
       napi_open_handle_scope((napi_env)env, out napi_handle_scope scope).ThrowIfFailed();
       SetHandle((IntPtr)scope);

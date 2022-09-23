@@ -1,4 +1,3 @@
-using NApi.Types;
 using System;
 using static NApi.NodeApi;
 
@@ -8,7 +7,7 @@ namespace NApi
   {
     public napi_escapable_handle_scope Handle => (napi_escapable_handle_scope)handle;
 
-    public JSEscapableValueScope(JsEnv env) : base(env)
+    public JSEscapableValueScope(JSEnvironment env) : base(env)
     {
       napi_open_escapable_handle_scope((napi_env)env, out napi_escapable_handle_scope scope).ThrowIfFailed();
       SetHandle((IntPtr)scope);

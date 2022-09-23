@@ -15,10 +15,9 @@ namespace NApi.SourceGenerators
             if (!(context.SyntaxContextReceiver is SyntaxReceiver receiver))
                 return;
 
-            StringBuilder source = new(@"
-using System;
+            StringBuilder source = new(
+@"using System;
 using System.Runtime.InteropServices;
-using NApi.Types;
 
 namespace NApi
 {
@@ -27,7 +26,7 @@ namespace NApi
         private static bool _initialized;
 
         [UnmanagedCallersOnly(EntryPoint = ""napi_register_module_v1"")]
-        public static IntPtr napi_register_module_v1(IntPtr envPtr, IntPtr exportsPtr)
+        public static napi_value napi_register_module_v1(napi_env env, napi_value exports)
         {
             if (!_initialized)
             {
@@ -35,17 +34,17 @@ namespace NApi
                 _initialized = true;
             }
 
-            using (var scope = JsScope.FromPointer(JsEnv.FromPointer(envPtr), null))
+            using (var scope = new JSRootValueScope(new JSEnvironment(env)))
             {
-                var exports = JsObject.FromPointer(scope, exportsPtr);
+                var exp = new JSValue(scope, exports);
 ");
             foreach (var method in receiver.MethodList)
             {
                 var methodName = method.ContainingType.ToDisplayString() + '.' + method.Name;
-                source.Append($"{methodName}(scope, exports);");
+                source.Append($"{methodName}(scope, exp);");
             }
 
-            source.Append("return exportsPtr; } } } }");
+            source.Append("return exports; } } } }");
 
             Console.WriteLine(source.ToString());
 
@@ -70,7 +69,7 @@ namespace NApi
                     var methodSymbol =
                         context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax) as IMethodSymbol;
                     if (methodSymbol!.GetAttributes().Any(attr =>
-                        attr.AttributeClass!.ToDisplayString() == "NApi.Attributes.ModuleExportsAttribute"))
+                        attr.AttributeClass!.ToDisplayString() == "NApi.ModuleExportsAttribute"))
                     {
                         MethodList.Add(methodSymbol);
                     }

@@ -1,5 +1,3 @@
-using NApi.Exception;
-using NApi.Types;
 using System;
 using System.Runtime.InteropServices;
 
@@ -7,12 +5,12 @@ namespace NApi
 {
   public abstract class JSValueScope : SafeHandle
   {
-    private JsEnv _env;
+    private JSEnvironment _env;
     [ThreadStatic] private static JSValueScope? t_current = null;
 
     public JSValueScope? ParentScope { get; }
 
-    public JsEnv Environment
+    public JSEnvironment Environment
     {
       get
       {
@@ -21,7 +19,7 @@ namespace NApi
       }
     }
 
-    protected JSValueScope(JsEnv env) : base(IntPtr.Zero, true)
+    protected JSValueScope(JSEnvironment env) : base(IntPtr.Zero, true)
     {
       _env = env;
       ParentScope = t_current;
@@ -33,7 +31,7 @@ namespace NApi
     public void EnsureIsValid()
     {
       if (IsInvalid)
-        throw new NApiException("Out of scope!");
+        throw new JSException("Out of scope!");
     }
 
     public override bool IsInvalid => handle == IntPtr.Zero;
@@ -43,7 +41,7 @@ namespace NApi
       if (scope != null)
         return (napi_env)scope.Environment;
       else
-        throw new NApiException("Out of scope!");
+        throw new JSException("Out of scope!");
     }
   }
 }

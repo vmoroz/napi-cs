@@ -1,7 +1,4 @@
-﻿using System;
-using NApi.Exception;
-
-namespace NApi
+﻿namespace NApi
 {
   public static class Extensions
   {
@@ -9,7 +6,7 @@ namespace NApi
     {
       if (status != napi_status.napi_ok)
       {
-        throw new NApiException(status);
+        throw new JSException(status);
       }
     }
 
@@ -17,7 +14,7 @@ namespace NApi
     {
       if (status != napi_status.napi_ok)
       {
-        throw new NApiException(message);
+        throw new JSException(message);
       }
     }
   }
