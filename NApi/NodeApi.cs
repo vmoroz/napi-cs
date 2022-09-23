@@ -748,12 +748,15 @@ namespace NApi
     // napi_status napi_set_instance_data(napi_env env, void* data,
     // napi_finalize finalize_cb, void* finalize_hint)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_set_instance_data(napi_env env, IntPtr data,
-        IntPtr finalize_cb, IntPtr finalize_hint);
+    internal static extern napi_status napi_set_instance_data(
+      napi_env env,
+      IntPtr data,
+      delegate*unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
+      IntPtr finalize_hint);
 
     // napi_status napi_get_instance_data(napi_env env, void **data)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_instance_data(napi_env env, void** data);
+    internal static extern napi_status napi_get_instance_data(napi_env env, out IntPtr data);
 
     // napi_status napi_detach_arraybuffer(napi_env env, napi_value arraybuffer)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

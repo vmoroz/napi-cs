@@ -1093,8 +1093,33 @@ namespace NApi
         (napi_key_collection_mode)mode,
         (napi_key_filter)filter,
         (napi_key_conversion)conversion,
-        out napi_value result);
+        out napi_value result).ThrowIfFailed();
       return result;
+    }
+
+    public static unsafe void SetInstanceData(object? data)
+    {
+      napi_get_instance_data((napi_env)JSValueScope.Current, out IntPtr handlePtr).ThrowIfFailed();
+      if (handlePtr != IntPtr.Zero)
+      {
+        GCHandle.FromIntPtr(handlePtr).Free();
+      }
+
+      if (data != null)
+      {
+        GCHandle handle = GCHandle.Alloc(data);
+        napi_set_instance_data(
+          (napi_env)JSValueScope.Current,
+          (IntPtr)handle,
+          &FinalizeHandle,
+          IntPtr.Zero).ThrowIfFailed();
+      }
+    }
+
+    public static object? GetInstanceData()
+    {
+      napi_get_instance_data((napi_env)JSValueScope.Current, out IntPtr data).ThrowIfFailed();
+      return (data != IntPtr.Zero) ? GCHandle.FromIntPtr(data).Target : null;
     }
   }
 }
