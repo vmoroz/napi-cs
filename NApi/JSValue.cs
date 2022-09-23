@@ -886,5 +886,44 @@ namespace NApi
       napi_get_arraybuffer_info((napi_env)JSValueScope.Current, (napi_value)this, out void* data, out nuint length).ThrowIfFailed();
       return new Span<byte>(data, (int)length);
     }
+
+    public bool IsTypedArray()
+    {
+      napi_is_typedarray((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      return result != 0;
+    }
+
+    public static JSValue CreateTypedArray(JSTypedArrayType type, int length, JSValue arrayBuffer, int byteOffset)
+    {
+      napi_create_typedarray(
+        (napi_env)JSValueScope.Current,
+        (napi_typedarray_type)(int)type,
+        (nuint)length,
+        (napi_value)arrayBuffer,
+        (nuint)byteOffset,
+        out napi_value result);
+      return result;
+    }
+
+    public unsafe void GetTypedArrayInfo(
+      out JSTypedArrayType type,
+      out int length,
+      out void* data,
+      out JSValue arrayBuffer,
+      out int byteOffset)
+    {
+      napi_get_typedarray_info(
+        (napi_env)Scope,
+        (napi_value)this,
+        out napi_typedarray_type type_,
+        out nuint length_,
+        out data,
+        out napi_value arrayBuffer_,
+        out nuint byteOffset_).ThrowIfFailed();
+      type = (JSTypedArrayType)(int)type_;
+      length = (int)length_;
+      arrayBuffer = arrayBuffer_;
+      byteOffset = (int)byteOffset_;
+    }
   }
 }

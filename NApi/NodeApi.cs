@@ -620,21 +620,30 @@ namespace NApi
 
     // napi_status napi_is_typedarray(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_typedarray(napi_env env, IntPtr value, bool* result);
+    internal static extern napi_status napi_is_typedarray(napi_env env, napi_value value, out sbyte result);
 
     // napi_status napi_create_typedarray(napi_env env, napi_typedarray_type type,
-    // size_t length, napi_value arraybuffer, size_t byte_offset, napi_value *result)
+    //   size_t length, napi_value arraybuffer, size_t byte_offset, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_create_typedarray(napi_env env,
-        napi_typedarray_type type, ulong length, IntPtr arraybuffer, ulong byte_offset,
-        IntPtr result);
+    internal static extern napi_status napi_create_typedarray(
+      napi_env env,
+      napi_typedarray_type type,
+      nuint length,
+      napi_value arraybuffer,
+      nuint byte_offset,
+      out napi_value result);
 
     // napi_status napi_get_typedarray_info(napi_env env, napi_value typedarray,
     // napi_typedarray_type* type, size_t *length, void** data, napi_value *arraybuffer, size_t* byte_offset)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_typedarray_info(napi_env env, IntPtr typedarray,
-        napi_typedarray_type* type, ulong* length, void** data, IntPtr arraybuffer,
-        ulong* byte_offset);
+    internal static extern napi_status napi_get_typedarray_info(
+      napi_env env,
+      napi_value typedarray,
+      out napi_typedarray_type type,
+      out nuint length,
+      out void* data,
+      out napi_value arraybuffer,
+      out nuint byte_offset);
 
     // napi_status napi_create_dataview(napi_env env, size_t length,
     // napi_value arraybuffer, size_t byte_offset, napi_value* result)
