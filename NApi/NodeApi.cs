@@ -594,28 +594,29 @@ namespace NApi
 
     // napi_status napi_get_and_clear_last_exception(napi_env env, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_and_clear_last_exception(napi_env env, IntPtr result);
+    internal static extern napi_status napi_get_and_clear_last_exception(napi_env env, out napi_value result);
 
     // napi_status napi_is_arraybuffer(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_arraybuffer(napi_env env, IntPtr value, bool* result);
+    internal static extern napi_status napi_is_arraybuffer(napi_env env, napi_value value, out sbyte result);
 
     // napi_status napi_create_arraybuffer(napi_env env, size_t byte_length, void **data, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_create_arraybuffer(napi_env env, ulong byte_length,
-        void** data, IntPtr result);
+    internal static extern napi_status napi_create_arraybuffer(napi_env env, nuint byte_length,
+        out void* data, out napi_value result);
 
     // napi_status napi_create_external_arraybuffer(napi_env env, void* external_data,
     // size_t byte_length, napi_finalize finalize_cb, void* finalize_hint, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_create_external_arraybuffer(napi_env env,
-        IntPtr external_data, ulong byte_length, IntPtr finalize_cb, IntPtr finalize_hint, IntPtr result);
+        void* external_data, nuint byte_length, delegate *unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> finalize_cb,
+        IntPtr finalize_hint, out napi_value result);
 
     // napi_status napi_get_arraybuffer_info(napi_env env, napi_value arraybuffer,
     // void** data, size_t *byte_length)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_arraybuffer_info(napi_env env, IntPtr arraybuffer,
-        void** data, ulong* byte_length);
+    internal static extern napi_status napi_get_arraybuffer_info(napi_env env, napi_value arraybuffer,
+        out void* data, out nuint byte_length);
 
     // napi_status napi_is_typedarray(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -290,6 +291,12 @@ namespace NApi
     private static unsafe void FinalizeHandle(IntPtr env, IntPtr data, IntPtr hint)
     {
       GCHandle.FromIntPtr(data).Free();
+    }
+
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static unsafe void FinalizeHintHandle(IntPtr env, IntPtr data, IntPtr hint)
+    {
+      GCHandle.FromIntPtr(hint).Free();
     }
 
     public unsafe void AddHandleFinalizer(IntPtr handle)
@@ -792,13 +799,13 @@ namespace NApi
 
     public bool IsError()
     {
-      napi_is_error((napi_env)Scope, (napi_value)this, out sbyte result);
+      napi_is_error((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
     public static bool IsExceptionPending()
     {
-      napi_is_exception_pending((napi_env)JSValueScope.Current, out sbyte result);
+      napi_is_exception_pending((napi_env)JSValueScope.Current, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -806,6 +813,78 @@ namespace NApi
     {
       napi_get_and_clear_last_exception((napi_env)JSValueScope.Current, out napi_value result).ThrowIfFailed();
       return result;
+    }
+
+    public bool IsArrayBuffer()
+    {
+      napi_is_arraybuffer((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      return result != 0;
+    }
+
+    public static unsafe JSValue CreateArrayBuffer(ReadOnlySpan<byte> data)
+    {
+      napi_create_arraybuffer((napi_env)JSValueScope.Current, (nuint)data.Length, out void* buffer, out napi_value result).ThrowIfFailed();
+      data.CopyTo(new Span<byte>(buffer, data.Length));
+      return result;
+    }
+
+    private class PinnedReadOnlyMemory : IDisposable
+    {
+      private bool _disposedValue = false;
+      private object? _owner;
+      private ReadOnlyMemory<byte> _memory;
+      private MemoryHandle _memoryHandle;
+
+      public PinnedReadOnlyMemory(object? owner, ReadOnlyMemory<byte> memory)
+      {
+        _owner = owner;
+        _memory = memory;
+        _memoryHandle = _memory.Pin();
+      }
+
+      public unsafe void* Pointer => _memoryHandle.Pointer;
+
+      public int Length => _memory.Length;
+
+      protected virtual void Dispose(bool disposing)
+      {
+        if (!_disposedValue)
+        {
+          if (disposing)
+          {
+            _memoryHandle.Dispose();
+          }
+
+          _owner = null;
+          _disposedValue = true;
+        }
+      }
+
+      public void Dispose()
+      {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+      }
+    }
+
+    public static unsafe JSValue CreateExternalArrayBuffer(object external, ReadOnlyMemory<byte> memory)
+    {
+      PinnedReadOnlyMemory pinnedMemory = new PinnedReadOnlyMemory(external, memory);
+      napi_create_external_arraybuffer(
+        (napi_env)JSValueScope.Current,
+        pinnedMemory.Pointer,
+        (nuint)pinnedMemory.Length,
+        &FinalizeHintHandle, // We pass object to finalize as a hint parameter
+        (IntPtr)GCHandle.Alloc(pinnedMemory),
+        out napi_value result).ThrowIfFailed();
+      return result;
+    }
+
+    public unsafe Span<byte> GetArrayBufferInfo()
+    {
+      napi_get_arraybuffer_info((napi_env)JSValueScope.Current, (napi_value)this, out void* data, out nuint length).ThrowIfFailed();
+      return new Span<byte>(data, (int)length);
     }
   }
 }
