@@ -557,64 +557,28 @@ namespace NApi
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static unsafe napi_value InvokeJSMethod(napi_env env, napi_callback_info callbackInfo)
     {
-      try
-      {
-        using (var scope = new JSEscapableValueScope(new JSEnvironment(env)))
-        {
-          JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
-          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
-          JSValue result = desc.Method!.Invoke(args);
-          return (napi_value)scope.Escape(result);
-        }
-      }
-      catch (System.Exception e)
-      {
-        //TODO: record as JS error
-        Console.Error.WriteLine(e);
-        throw;
-      }
+      using JSRootValueScope scope = new(new JSEnvironment(env));
+      JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
+      JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
+      return (napi_value)desc.Method!.Invoke(args);
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static unsafe napi_value InvokeJSGetter(napi_env env, napi_callback_info callbackInfo)
     {
-      try
-      {
-        using (var scope = new JSEscapableValueScope(new JSEnvironment(env)))
-        {
-          JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
-          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
-          JSValue result = desc.Getter!.Invoke(args);
-          return (napi_value)scope.Escape(result);
-        }
-      }
-      catch (System.Exception e)
-      {
-        //TODO: record as JS error
-        Console.Error.WriteLine(e);
-        throw;
-      }
+      using JSRootValueScope scope = new(new JSEnvironment(env));
+      JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
+      JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
+      return (napi_value)desc.Getter!.Invoke(args);
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static unsafe napi_value InvokeJSSetter(napi_env env, napi_callback_info callbackInfo)
     {
-      try
-      {
-        using (var scope = new JSEscapableValueScope(new JSEnvironment(env)))
-        {
-          JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
-          JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
-          JSValue result = desc.Setter!.Invoke(args);
-          return (napi_value)scope.Escape(result);
-        }
-      }
-      catch (System.Exception e)
-      {
-        //TODO: record as JS error
-        Console.Error.WriteLine(e);
-        throw;
-      }
+      using JSRootValueScope scope = new(new JSEnvironment(env));
+      JSCallbackArgs args = new(scope, callbackInfo);
+      JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
+      return (napi_value)desc.Setter!.Invoke(args);
     }
 
     private unsafe delegate void UseUnmanagedDescriptors(nuint count, napi_property_descriptor* descriptors);
