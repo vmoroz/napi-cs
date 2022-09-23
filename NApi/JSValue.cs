@@ -74,6 +74,29 @@ namespace NApi
     DefaultProperty = Writable | Enumerable | Configurable,
   }
 
+  public enum JSKeyCollectionMode : int
+  {
+    IncludePrototypes = 0,
+    OwnOnly = 1,
+  }
+
+  [Flags]
+  public enum JSKeyFilter : int
+  {
+    AllProperties = 0,
+    Writable = 1,
+    Enumerable = 2,
+    Configurable = 4,
+    SkipStrings = 8,
+    SkipSymbols = 16,
+  }
+
+  public enum JSKeyConversion : int
+  {
+    KeepNumbers = 0,
+    NumbersToStrings = 1,
+  }
+
   public class JSPropertyDescriptor
   {
     public JSValue Name { get; }
@@ -122,6 +145,30 @@ namespace NApi
     {
     }
   }
+
+  public class JSDeferred
+  {
+    private napi_deferred _handle;
+
+    public JSDeferred(napi_deferred handle)
+    {
+      _handle = handle;
+    }
+
+    public void Resolve(JSValue resolution)
+    {
+      // _handle becomes invalid after this call
+      napi_resolve_deferred((napi_env)resolution.Scope, _handle, (napi_value)resolution).ThrowIfFailed();
+    }
+
+    public void Reject(JSValue rejection)
+    {
+      // _handle becomes invalid after this call
+      napi_resolve_deferred((napi_env)rejection.Scope, _handle, (napi_value)rejection).ThrowIfFailed();
+    }
+  }
+
+  //TODO: implement JSValue array that can have a single Scope field for multiples napi_value
 
   // New class for JSValue
   public class JSValue
@@ -970,28 +1017,84 @@ namespace NApi
       napi_is_promise((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
+
+    public JSValue RunScript()
+    {
+      napi_run_script((napi_env)Scope, (napi_value)this, out napi_value result).ThrowIfFailed();
+      return result;
+    }
+
+    public static JSValue CreateDate(double time)
+    {
+      napi_create_date((napi_env)JSValueScope.Current, time, out napi_value result).ThrowIfFailed();
+      return result;
+    }
+
+    public bool IsDate()
+    {
+      napi_is_date((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      return result != 0;
+    }
+
+    public double GetDateValue()
+    {
+      napi_get_date_value((napi_env)Scope, (napi_value)this, out double result).ThrowIfFailed();
+      return result;
+    }
+
+    public static JSValue CreateBigInt(long value)
+    {
+      napi_create_bigint_int64((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      return result;
+    }
+
+    public static JSValue CreateBigInt(ulong value)
+    {
+      napi_create_bigint_uint64((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      return result;
+    }
+
+    public static unsafe JSValue CreateBigInt(int signBit, ReadOnlyMemory<ulong> words)
+    {
+      napi_create_bigint_words((napi_env)JSValueScope.Current, signBit, (nuint)words.Length, (ulong*)words.Pin().Pointer, out napi_value result).ThrowIfFailed();
+      return result;
+    }
+
+    public long GetValueBigIntInt64(out bool isLossless)
+    {
+      napi_get_value_bigint_int64((napi_env)Scope, (napi_value)this, out long result, out sbyte lossless).ThrowIfFailed();
+      isLossless = lossless != 0;
+      return result;
+    }
+
+    public ulong GetValueBigIntUInt64(out bool isLossless)
+    {
+      napi_get_value_bigint_uint64((napi_env)Scope, (napi_value)this, out ulong result, out sbyte lossless).ThrowIfFailed();
+      isLossless = lossless != 0;
+      return result;
+    }
+
+    public unsafe ulong[] GetValueBigIntWords(out int signBit)
+    {
+      napi_get_value_bigint_words((napi_env)Scope, (napi_value)this, out signBit, out nuint wordCount, null).ThrowIfFailed();
+      ulong[] words = new ulong[wordCount];
+      fixed (ulong* wordsPtr = &words[0])
+      {
+        napi_get_value_bigint_words((napi_env)Scope, (napi_value)this, out signBit, out wordCount, wordsPtr).ThrowIfFailed();
+      }
+      return words;
+    }
+
+    public JSValue GetAllPropertyNames(JSKeyCollectionMode mode, JSKeyFilter filter, JSKeyConversion conversion)
+    {
+      napi_get_all_property_names(
+        (napi_env)Scope,
+        (napi_value)this,
+        (napi_key_collection_mode)mode,
+        (napi_key_filter)filter,
+        (napi_key_conversion)conversion,
+        out napi_value result);
+      return result;
+    }
   }
-
-  public class JSDeferred
-  {
-    private napi_deferred _handle;
-
-    public JSDeferred(napi_deferred handle)
-    {
-      _handle = handle;
-    }
-
-    public void Resolve(JSValue resolution)
-    {
-      // _handle becomes invalid after this call
-      napi_resolve_deferred((napi_env)resolution.Scope, _handle, (napi_value)resolution).ThrowIfFailed();
-    }
-
-    public void Reject(JSValue rejection)
-    {
-      // _handle becomes invalid after this call
-      napi_resolve_deferred((napi_env)rejection.Scope, _handle, (napi_value)rejection).ThrowIfFailed();
-    }
-  }
-
 }
