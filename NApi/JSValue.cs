@@ -189,104 +189,88 @@ namespace NApi
       Value = value;
     }
 
-    private static JSValueScope GetScope()
-    {
-      JSValueScope? scope = JSValueScope.Current;
-      if (scope == null)
-        throw new InvalidOperationException("Scope is null");
-      return scope;
-    }
-
-    private static unsafe JSValue CreateJSValue(Func<napi_env, napi_value_ptr, napi_status> creator)
-    {
-      JSValueScope scope = GetScope();
-      napi_value value;
-      napi_value_ptr valuePtr = new napi_value_ptr { Pointer = new IntPtr(&value) };
-      creator((napi_env)scope, valuePtr).ThrowIfFailed();
-      return new JSValue(scope, value);
-    }
-
     public static JSValue GetUndefined()
     {
-      return CreateJSValue((env, result) => napi_get_undefined(env, result));
+      napi_get_undefined((napi_env)JSValueScope.Current, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue GetNull()
     {
-      return CreateJSValue((env, result) => napi_get_null(env, result));
+      napi_get_null((napi_env)JSValueScope.Current, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue GetGlobal()
     {
-      return CreateJSValue((env, result) => napi_get_global(env, result));
+      napi_get_global((napi_env)JSValueScope.Current, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue GetBoolean(bool value)
     {
-      return CreateJSValue((env, result) => napi_get_boolean(env, value, result));
+      napi_get_boolean((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateObject()
     {
-      return CreateJSValue((env, result) => napi_create_object(env, result));
+      napi_create_object((napi_env)JSValueScope.Current, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateArray()
     {
-      return CreateJSValue((env, result) => napi_create_array(env, result));
+      napi_create_array((napi_env)JSValueScope.Current, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateArray(int length)
     {
-      return CreateJSValue((env, result) =>
-        napi_create_array_with_length(env, (nuint)length, result));
+      napi_create_array_with_length((napi_env)JSValueScope.Current, (nuint)length, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateNumber(double value)
     {
-      return CreateJSValue((env, result) => napi_create_double(env, value, result));
+      napi_create_double((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateNumber(int value)
     {
-      return CreateJSValue((env, result) => napi_create_int32(env, value, result));
+      napi_create_int32((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateNumber(uint value)
     {
-      return CreateJSValue((env, result) => napi_create_uint32(env, value, result));
+      napi_create_uint32((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateNumber(long value)
     {
-      return CreateJSValue((env, result) => napi_create_int64(env, value, result));
+      napi_create_int64((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
-    public static JSValue CreateStringLatin1(ReadOnlyMemory<byte> value)
+    public static unsafe JSValue CreateStringLatin1(ReadOnlyMemory<byte> value)
     {
-      unsafe
-      {
-        return CreateJSValue((env, result) =>
-          napi_create_string_latin1(env, value.Pin().Pointer, (nuint)value.Length, result));
-      }
+      napi_create_string_latin1((napi_env)JSValueScope.Current, value.Pin().Pointer, (nuint)value.Length, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
-    public static JSValue CreateStringUtf8(ReadOnlyMemory<byte> value)
+    public static unsafe JSValue CreateStringUtf8(ReadOnlyMemory<byte> value)
     {
-      unsafe
-      {
-        return CreateJSValue((env, result) =>
-          napi_create_string_utf8(env, value.Pin().Pointer, (nuint)value.Length, result));
-      }
+      napi_create_string_utf8((napi_env)JSValueScope.Current, value.Pin().Pointer, (nuint)value.Length, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
-    public static JSValue CreateStringUtf16(ReadOnlyMemory<char> value)
+    public static unsafe JSValue CreateStringUtf16(ReadOnlyMemory<char> value)
     {
-      unsafe
-      {
-        return CreateJSValue((env, result) =>
-          napi_create_string_utf16(env, value.Pin().Pointer, (nuint)value.Length, result));
-      }
+      napi_create_string_utf16((napi_env)JSValueScope.Current, value.Pin().Pointer, (nuint)value.Length, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateStringUtf16(string value)
@@ -296,21 +280,21 @@ namespace NApi
 
     public static JSValue CreateSymbol(JSValue description)
     {
-      return CreateJSValue((env, result) =>
-        napi_create_symbol(env, description.Value, result));
+      napi_create_symbol((napi_env)JSValueScope.Current, description.Value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateSymbol(string description)
     {
-      return CreateJSValue((env, result) =>
-        napi_create_symbol(env, CreateStringUtf16(description).Value, result));
+      napi_create_symbol((napi_env)JSValueScope.Current, CreateStringUtf16(description).Value, out napi_value result).ThrowIfFailed(); ;
+      return result;
     }
 
     public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name,
       delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> callback, IntPtr data)
     {
-      return CreateJSValue((env, result) =>
-        napi_create_function(env, utf8Name.Pin().Pointer, (nuint)utf8Name.Length, callback, data, result));
+      napi_create_function((napi_env)JSValueScope.Current, utf8Name.Pin().Pointer, (nuint)utf8Name.Length, callback, data, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
@@ -369,27 +353,26 @@ namespace NApi
 
     public static JSValue CreateError(JSValue code, JSValue message)
     {
-      return CreateJSValue((env, result) =>
-        napi_create_error(env, code.Value, message.Value, result));
+      napi_create_error((napi_env)JSValueScope.Current, code.Value, message.Value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateTypeError(JSValue code, JSValue message)
     {
-      return CreateJSValue((env, result) =>
-        napi_create_type_error(env, code.Value, message.Value, result));
+      napi_create_type_error((napi_env)JSValueScope.Current, code.Value, message.Value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public static JSValue CreateRangeError(JSValue code, JSValue message)
     {
-      return CreateJSValue((env, result) =>
-        napi_create_range_error(env, code.Value, message.Value, result));
+      napi_create_range_error((napi_env)JSValueScope.Current, code.Value, message.Value, out napi_value result).ThrowIfFailed();
+      return result;
     }
 
     public unsafe JSValueType TypeOf()
     {
-      JSValueType result;
-      napi_typeof((napi_env)Scope, Value, &result).ThrowIfFailed();
-      return result;
+      napi_typeof((napi_env)Scope, Value, out napi_valuetype result).ThrowIfFailed();
+      return (JSValueType)result;
     }
 
     public bool TryGetValue(out double value)
