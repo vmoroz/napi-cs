@@ -663,24 +663,23 @@ namespace NApi
 
     // napi_status napi_get_version(napi_env env, uint32_t *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_version(napi_env env, uint* result);
+    internal static extern napi_status napi_get_version(napi_env env, out uint result);
 
     // napi_status napi_create_promise(napi_env env, napi_deferred *deferred, napi_value *promise)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_create_promise(napi_env env, IntPtr deferred,
-        IntPtr promise);
+    internal static extern napi_status napi_create_promise(napi_env env, out napi_deferred deferred, out napi_value promise);
 
     // napi_status napi_resolve_deferred(napi_env env, napi_deferred deferred, napi_value resolution)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_resolve_deferred(napi_env env, IntPtr deferred, IntPtr resolution);
+    internal static extern napi_status napi_resolve_deferred(napi_env env, napi_deferred deferred, napi_value resolution);
 
     // napi_status napi_reject_deferred(napi_env env, napi_deferred deferred, napi_value rejection)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_reject_deferred(napi_env env, IntPtr deferred, IntPtr rejection);
+    internal static extern napi_status napi_reject_deferred(napi_env env, napi_deferred deferred, napi_value rejection);
 
     // napi_status napi_is_promise(napi_env env, napi_value value, bool *is_promise)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_promise(napi_env env, IntPtr value, bool* is_promise);
+    internal static extern napi_status napi_is_promise(napi_env env, napi_value value, out sbyte is_promise);
 
     // napi_status napi_run_script(napi_env env, napi_value script, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

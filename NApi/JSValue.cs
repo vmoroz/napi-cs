@@ -901,7 +901,7 @@ namespace NApi
         (nuint)length,
         (napi_value)arrayBuffer,
         (nuint)byteOffset,
-        out napi_value result);
+        out napi_value result).ThrowIfFailed();
       return result;
     }
 
@@ -928,13 +928,13 @@ namespace NApi
 
     public static JSValue CreateDataView(int length, JSValue arrayBuffer, int byteOffset)
     {
-      napi_create_dataview((napi_env)JSValueScope.Current, (nuint)length, (napi_value)arrayBuffer, (nuint)byteOffset, out napi_value result);
+      napi_create_dataview((napi_env)JSValueScope.Current, (nuint)length, (napi_value)arrayBuffer, (nuint)byteOffset, out napi_value result).ThrowIfFailed();
       return result;
     }
 
     public bool IsDataView()
     {
-      napi_is_dataview((napi_env)Scope, (napi_value)this, out sbyte result);
+      napi_is_dataview((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -946,10 +946,52 @@ namespace NApi
         out nuint byteLength,
         out void* data,
         out napi_value arrayBuffer_,
-        out nuint byteOffset_);
+        out nuint byteOffset_).ThrowIfFailed();
       viewSpan = new ReadOnlySpan<byte>(data, (int)byteLength);
       arrayBuffer = arrayBuffer_;
       byteOffset = (int)byteOffset_;
     }
+
+    public static uint GetVersion()
+    {
+      napi_get_version((napi_env)JSValueScope.Current, out uint result).ThrowIfFailed();
+      return result;
+    }
+
+    public static JSValue CreatePromise(out JSDeferred deferred)
+    {
+      napi_create_promise((napi_env)JSValueScope.Current, out napi_deferred deferred_, out napi_value promise).ThrowIfFailed();
+      deferred = new JSDeferred(deferred_);
+      return promise;
+    }
+
+    public bool IsPromise()
+    {
+      napi_is_promise((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      return result != 0;
+    }
   }
+
+  public class JSDeferred
+  {
+    private napi_deferred _handle;
+
+    public JSDeferred(napi_deferred handle)
+    {
+      _handle = handle;
+    }
+
+    public void Resolve(JSValue resolution)
+    {
+      // _handle becomes invalid after this call
+      napi_resolve_deferred((napi_env)resolution.Scope, _handle, (napi_value)resolution).ThrowIfFailed();
+    }
+
+    public void Reject(JSValue rejection)
+    {
+      // _handle becomes invalid after this call
+      napi_resolve_deferred((napi_env)rejection.Scope, _handle, (napi_value)rejection).ThrowIfFailed();
+    }
+  }
+
 }
