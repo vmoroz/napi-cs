@@ -436,6 +436,7 @@ namespace NApi
     public static implicit operator JSValue(float value) => CreateNumber(value);
     public static implicit operator JSValue(double value) => CreateNumber(value);
     public static implicit operator JSValue(string value) => CreateStringUtf16(value);
+    public static implicit operator JSValue(JSCallback callback) => CreateFunction("Unknown", callback);
 
     public static explicit operator bool(JSValue value)
     {
