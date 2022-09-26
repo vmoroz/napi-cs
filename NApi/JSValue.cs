@@ -7,7 +7,7 @@ using static NApi.NodeApi;
 
 namespace NApi
 {
-  public ref struct JSCallbackArgs
+  public class JSCallbackArgs
   {
     private JSValue[] _args;
 
@@ -818,10 +818,11 @@ namespace NApi
       return DefineClass(Encoding.UTF8.GetBytes(name), callback, descriptors);
     }
 
-    public unsafe void Wrap(object value)
+    public unsafe JSValue Wrap(object value)
     {
       GCHandle valueHandle = GCHandle.Alloc(value);
       napi_wrap((napi_env)Scope, (napi_value)this, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed();
+      return this;
     }
 
     public object Unwrap()
