@@ -1,5 +1,5 @@
 ﻿using System;
-using static NodeApi.NodeApi;
+using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using static NodeApi.NodeApi;
+using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 

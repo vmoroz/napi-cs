@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using static NodeApi.NodeApi;
+using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 

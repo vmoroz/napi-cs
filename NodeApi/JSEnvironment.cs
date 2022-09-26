@@ -1,4 +1,6 @@
-﻿namespace NodeApi;
+﻿using static NodeApi.JSNative.Interop;
+
+namespace NodeApi;
 
 public sealed class JSEnvironment
 {
