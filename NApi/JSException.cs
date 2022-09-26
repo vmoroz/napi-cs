@@ -1,19 +1,18 @@
 ﻿using System;
 
-namespace NApi
+namespace NApi;
+
+public class JSException : Exception
 {
-  public class JSException : Exception
+  public override string Message { get; }
+
+  public unsafe JSException(napi_status status)
   {
-    public override string Message { get; }
+    Message = status.ToString();
+  }
 
-    public unsafe JSException(napi_status status)
-    {
-      Message = status.ToString();
-    }
-
-    public unsafe JSException(string message)
-    {
-      Message = message;
-    }
+  public unsafe JSException(string message)
+  {
+    Message = message;
   }
 }

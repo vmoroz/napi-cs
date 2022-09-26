@@ -1,6 +1,7 @@
-﻿using NApi;
+﻿using System;
 using System.Collections.Generic;
-using System;
+
+namespace NApi;
 
 public class JSClassBuilder<T> where T : class
 {

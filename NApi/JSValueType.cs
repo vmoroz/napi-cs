@@ -1,16 +1,15 @@
-﻿namespace NApi
+﻿namespace NApi;
+
+public enum JSValueType : int
 {
-  public enum JSValueType : int
-  {
-    Undefined,
-    Null,
-    Boolean,
-    Number,
-    String,
-    Symbol,
-    Object,
-    Function,
-    External,
-    BigInt,
-  }
+  Undefined,
+  Null,
+  Boolean,
+  Number,
+  String,
+  Symbol,
+  Object,
+  Function,
+  External,
+  BigInt,
 }
