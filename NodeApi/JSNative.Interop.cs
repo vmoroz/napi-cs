@@ -181,7 +181,7 @@ public static partial class JSNative
 
     public struct napi_extended_error_info
     {
-      public IntPtr error_message;
+      public byte* error_message;
       public IntPtr engine_reserved;
       public uint engine_error_code;
       public napi_status error_code;
@@ -244,7 +244,7 @@ public static partial class JSNative
 
     // napi_status napi_get_last_error_info(napi_env env, const napi_extended_error_info **result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_last_error_info(napi_env env, IntPtr result);
+    internal static extern napi_status napi_get_last_error_info(napi_env env, out napi_extended_error_info* result);
 
     // napi_status napi_get_undefined(napi_env env, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

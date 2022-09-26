@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,6 +11,24 @@ namespace NodeApi;
 // Node API managed wrappers
 public static partial class JSNative
 {
+  public static void ThrowIfFailed(this napi_status status)
+  {
+    if (status != napi_status.napi_ok)
+    {
+      throw new JSException(status);
+    }
+  }
+
+  public static unsafe JSErrorInfo GetLastErrorInfo()
+  {
+    napi_get_last_error_info((napi_env)JSValueScope.Current, out napi_extended_error_info* errorInfo).ThrowIfFailed();
+    if (errorInfo->error_message != null)
+    {
+      string message = Encoding.UTF8.GetString(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(errorInfo->error_message));
+      return new JSErrorInfo(message, errorInfo->error_code);
+    }
+    return new JSErrorInfo("Error", errorInfo->error_code);
+  }
   public static JSValue GetUndefined()
   {
     napi_get_undefined((napi_env)JSValueScope.Current, out napi_value result).ThrowIfFailed();
