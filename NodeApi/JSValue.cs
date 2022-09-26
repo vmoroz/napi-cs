@@ -7,7 +7,7 @@ using static NodeApi.NodeApi;
 
 namespace NodeApi;
 
-public class JSValue
+public struct JSValue
 {
   internal JSValueScope Scope { get; }
 
