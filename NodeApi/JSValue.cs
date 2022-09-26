@@ -539,9 +539,10 @@ public struct JSValue
 
   public unsafe void DefineProperties(params JSPropertyDescriptor[] descriptors)
   {
+    JSValue self = this;
     IntPtr[] handles = ToUnmanagedPropertyDescriptors(descriptors, (count, descriptorsPtr) =>
-      napi_define_properties((napi_env)Scope, (napi_value)this, count, descriptorsPtr).ThrowIfFailed());
-    Array.ForEach(handles, handle => AddHandleFinalizer(handle));
+      napi_define_properties((napi_env)self.Scope, (napi_value)self, count, descriptorsPtr).ThrowIfFailed());
+    Array.ForEach(handles, handle => self.AddHandleFinalizer(handle));
   }
 
   public bool IsArray()
@@ -645,8 +646,8 @@ public struct JSValue
     {
       func = DefineClass(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle, count, descriptorsPtr);
     });
-    Array.ForEach(handles, handle => func!.AddHandleFinalizer(handle));
-    return func!;
+    Array.ForEach(handles, handle => func!.Value.AddHandleFinalizer(handle));
+    return func!.Value;
   }
 
   public static unsafe JSValue DefineClass(string name, JSCallback callback, params JSPropertyDescriptor[] descriptors)
