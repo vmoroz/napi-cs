@@ -5,7 +5,7 @@ namespace Example;
 
 public class Example
 {
-  [ModuleExports]
+  [JSModuleExports]
   public static void ModuleExports(JSValue exports)
   {
     exports["plus"] = (JSCallback)(args => (double)args[0] + (double)args[1]);

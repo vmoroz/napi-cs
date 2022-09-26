@@ -2,7 +2,7 @@
 
 namespace NodeApi;
 
-public static class ExtensionMethods
+public static class JSExtensionMethods
 {
   public static void ThrowIfFailed(this napi_status status)
   {

@@ -19,6 +19,7 @@ public class ModuleExportsSourceGenerator : ISourceGenerator
 @"
 using System;
 using System.Runtime.InteropServices;
+using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 
@@ -31,7 +32,7 @@ public class ModuleExports_AutoGen
   {
     if (!_initialized)
     {
-      NodeApi.SetupDllImportResolver(typeof(NodeApi).Assembly);
+      SetupDllImportResolver(typeof(JSNative).Assembly);
       _initialized = true;
     }
 
@@ -74,7 +75,7 @@ public class ModuleExports_AutoGen
         var methodSymbol =
             context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax) as IMethodSymbol;
         if (methodSymbol!.GetAttributes().Any(attr =>
-            attr.AttributeClass!.ToDisplayString() == "NodeApi.ModuleExportsAttribute"))
+            attr.AttributeClass!.ToDisplayString() == "NodeApi.JSModuleExportsAttribute"))
         {
           MethodList.Add(methodSymbol);
         }
