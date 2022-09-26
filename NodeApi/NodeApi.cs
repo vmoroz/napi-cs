@@ -108,13 +108,15 @@ public struct napi_env
 
 public struct napi_value
 {
-  public IntPtr Pointer;
+  public IntPtr Handle { get; init; } = IntPtr.Zero;
 
-  public bool IsNull => Pointer == IntPtr.Zero;
+  public napi_value() { }
 
-  public static implicit operator napi_value(IntPtr value) => new napi_value { Pointer = value };
+  public bool IsNull => Handle == IntPtr.Zero;
 
-  public static readonly napi_value Null = new napi_value { Pointer = IntPtr.Zero };
+  public static implicit operator napi_value(IntPtr value) => new napi_value { Handle = value };
+
+  public static readonly napi_value Null = new napi_value { Handle = IntPtr.Zero };
 }
 
 public struct napi_ref
@@ -149,12 +151,12 @@ public struct napi_escapable_handle_scope
 
 public struct napi_callback_info
 {
-  public IntPtr Pointer;
+  public IntPtr Handle { get; }
 }
 
 public struct napi_deferred
 {
-  public IntPtr Pointer;
+  public IntPtr Handle { get; }
 }
 
 public unsafe struct napi_property_descriptor
