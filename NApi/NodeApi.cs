@@ -232,7 +232,7 @@ namespace NApi
 
     // napi_status napi_get_boolean(napi_env env, bool value, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_boolean(napi_env env, bool value, out napi_value result);
+    internal static extern napi_status napi_get_boolean(napi_env env, byte value, out napi_value result);
 
     // napi_status napi_create_object(napi_env env, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -318,19 +318,19 @@ namespace NApi
 
     // napi_status napi_get_value_bool(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_get_value_bool(napi_env env, napi_value value, out sbyte result);
+    internal static extern napi_status napi_get_value_bool(napi_env env, napi_value value, out byte result);
 
     // napi_status napi_get_value_string_latin1(napi_env env, napi_value value,
     //   char* buf, size_t bufsize, size_t* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_get_value_string_latin1(napi_env env, napi_value value,
-        sbyte* buf, nuint bufsize, nuint* result);
+        byte* buf, nuint bufsize, nuint* result);
 
     // napi_status napi_get_value_string_utf8(napi_env env, napi_value value,
     //    char* buf, size_t bufsize, size_t* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_get_value_string_utf8(napi_env env, napi_value value,
-        sbyte* buf, nuint bufsize, nuint* result);
+        byte* buf, nuint bufsize, nuint* result);
 
     // napi_status napi_get_value_string_utf16(napi_env env, napi_value value,
     //    char16_t* buf, size_t bufsize, size_t* result)
@@ -368,7 +368,7 @@ namespace NApi
 
     // napi_status napi_has_property(napi_env env, napi_value object, napi_value key, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_has_property(napi_env env, napi_value @object, napi_value key, out sbyte result);
+    internal static extern napi_status napi_has_property(napi_env env, napi_value @object, napi_value key, out byte result);
 
     // napi_status napi_get_property(napi_env env, napi_value object, napi_value key, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -376,11 +376,11 @@ namespace NApi
 
     // napi_status napi_delete_property(napi_env env, napi_value object, napi_value key, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_delete_property(napi_env env, napi_value @object, napi_value key, out sbyte result);
+    internal static extern napi_status napi_delete_property(napi_env env, napi_value @object, napi_value key, out byte result);
 
     // napi_status napi_has_own_property(napi_env env, napi_value object, napi_value key, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_has_own_property(napi_env env, napi_value @object, napi_value key, out sbyte result);
+    internal static extern napi_status napi_has_own_property(napi_env env, napi_value @object, napi_value key, out byte result);
 
     // napi_status napi_set_named_property(napi_env env, napi_value object,
     //   const char* utf8name, napi_value value)
@@ -397,7 +397,7 @@ namespace NApi
       napi_env env,
       napi_value @object,
       [MarshalAs(UnmanagedType.LPUTF8Str)] string utf8name,
-      out sbyte result);
+      out byte result);
 
     // napi_status napi_get_named_property(napi_env env, napi_value object,
     //    const char* utf8name, napi_value *result)
@@ -414,7 +414,7 @@ namespace NApi
 
     // napi_status napi_has_element(napi_env env, napi_value object, uint32_t index, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_has_element(napi_env env, napi_value @object, uint index, out sbyte result);
+    internal static extern napi_status napi_has_element(napi_env env, napi_value @object, uint index, out byte result);
 
     // napi_status napi_get_element(napi_env env, napi_value object, uint32_t index, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -422,7 +422,7 @@ namespace NApi
 
     // napi_status napi_delete_element(napi_env env, napi_value object, uint32_t index, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_delete_element(napi_env env, napi_value @object, uint index, out sbyte result);
+    internal static extern napi_status napi_delete_element(napi_env env, napi_value @object, uint index, out byte result);
 
     // napi_status napi_define_properties(napi_env env, napi_value object,
     //    size_t property_count, const napi_property_descriptor* properties)
@@ -432,7 +432,7 @@ namespace NApi
 
     // napi_status napi_is_array(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_array(napi_env env, napi_value value, out sbyte result);
+    internal static extern napi_status napi_is_array(napi_env env, napi_value value, out byte result);
 
     // napi_status napi_get_array_length(napi_env env, napi_value value, uint32_t *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -440,7 +440,7 @@ namespace NApi
 
     // napi_status napi_strict_equals(napi_env env, napi_value lhs, napi_value rhs, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_strict_equals(napi_env env, napi_value lhs, napi_value rhs, out sbyte result);
+    internal static extern napi_status napi_strict_equals(napi_env env, napi_value lhs, napi_value rhs, out byte result);
 
     // napi_status napi_call_function(napi_env env, napi_value recv, napi_value func,
     //   size_t argc, const napi_value* argv, napi_value *result)
@@ -456,7 +456,7 @@ namespace NApi
 
     // napi_status napi_instanceof(napi_env env, napi_value object, napi_value constructor, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_instanceof(napi_env env, napi_value @object, napi_value constructor, out sbyte result);
+    internal static extern napi_status napi_instanceof(napi_env env, napi_value @object, napi_value constructor, out byte result);
 
     // napi_status napi_get_cb_info(
     //     napi_env env,              // [in] NAPI environment handle
@@ -585,11 +585,11 @@ namespace NApi
 
     // napi_status napi_is_error(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_error(napi_env env, napi_value value, out sbyte result);
+    internal static extern napi_status napi_is_error(napi_env env, napi_value value, out byte result);
 
     // napi_status napi_is_exception_pending(napi_env env, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_exception_pending(napi_env env, out sbyte result);
+    internal static extern napi_status napi_is_exception_pending(napi_env env, out byte result);
 
     // napi_status napi_get_and_clear_last_exception(napi_env env, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -597,7 +597,7 @@ namespace NApi
 
     // napi_status napi_is_arraybuffer(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_arraybuffer(napi_env env, napi_value value, out sbyte result);
+    internal static extern napi_status napi_is_arraybuffer(napi_env env, napi_value value, out byte result);
 
     // napi_status napi_create_arraybuffer(napi_env env, size_t byte_length, void **data, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -619,7 +619,7 @@ namespace NApi
 
     // napi_status napi_is_typedarray(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_typedarray(napi_env env, napi_value value, out sbyte result);
+    internal static extern napi_status napi_is_typedarray(napi_env env, napi_value value, out byte result);
 
     // napi_status napi_create_typedarray(napi_env env, napi_typedarray_type type,
     //   size_t length, napi_value arraybuffer, size_t byte_offset, napi_value *result)
@@ -652,7 +652,7 @@ namespace NApi
 
     // napi_status napi_is_dataview(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_dataview(napi_env env, napi_value value, out sbyte result);
+    internal static extern napi_status napi_is_dataview(napi_env env, napi_value value, out byte result);
 
     // napi_status napi_get_dataview_info(napi_env env, napi_value dataview,
     // size_t* bytelength, void** data, napi_value *arraybuffer, size_t* byte_offset)
@@ -678,7 +678,7 @@ namespace NApi
 
     // napi_status napi_is_promise(napi_env env, napi_value value, bool *is_promise)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_promise(napi_env env, napi_value value, out sbyte is_promise);
+    internal static extern napi_status napi_is_promise(napi_env env, napi_value value, out byte is_promise);
 
     // napi_status napi_run_script(napi_env env, napi_value script, napi_value *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -694,7 +694,7 @@ namespace NApi
 
     // napi_status napi_is_date(napi_env env, napi_value value, bool *is_date)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_date(napi_env env, napi_value value, out sbyte is_date);
+    internal static extern napi_status napi_is_date(napi_env env, napi_value value, out byte is_date);
 
     // napi_status napi_get_date_value(napi_env env, napi_value value, double *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -723,12 +723,12 @@ namespace NApi
     // napi_status napi_get_value_bigint_int64(napi_env env, napi_value value, int64_t *result, bool *lossless)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_get_value_bigint_int64(napi_env env, napi_value value,
-        out long result, out sbyte lossless);
+        out long result, out byte lossless);
 
     // napi_status napi_get_value_bigint_uint64(napi_env env, napi_value value, uint64_t *result, bool *lossless)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_get_value_bigint_uint64(napi_env env, napi_value value,
-        out ulong result, out sbyte lossless);
+        out ulong result, out byte lossless);
 
     // napi_status napi_get_value_bigint_words(napi_env env, napi_value value, int* sign_bit,
     // size_t* word_count, uint64_t* words)
@@ -763,8 +763,7 @@ namespace NApi
 
     // napi_status napi_is_detached_arraybuffer(napi_env env, napi_value value, bool *result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    internal static extern napi_status napi_is_detached_arraybuffer(napi_env env, napi_value value,
-        out sbyte result);
+    internal static extern napi_status napi_is_detached_arraybuffer(napi_env env, napi_value value, out byte result);
 
     // napi_status napi_type_tag_object(napi_env env, napi_value value, const napi_type_tag *type_tag)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -774,7 +773,7 @@ namespace NApi
     // const napi_type_tag* type_tag, bool* result)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern napi_status napi_check_object_type_tag(napi_env env, napi_value value,
-        ref napi_type_tag type_tag, out sbyte result);
+        ref napi_type_tag type_tag, out byte result);
 
     // napi_status napi_object_freeze(napi_env env, napi_value object)
     [DllImport(nameof(NodeApi), CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

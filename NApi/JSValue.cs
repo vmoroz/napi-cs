@@ -209,7 +209,7 @@ namespace NApi
 
     public static JSValue GetBoolean(bool value)
     {
-      napi_get_boolean((napi_env)JSValueScope.Current, value, out napi_value result).ThrowIfFailed();
+      napi_get_boolean((napi_env)JSValueScope.Current, (byte)(value ? 1 : 0), out napi_value result).ThrowIfFailed();
       return result;
     }
 
@@ -397,7 +397,7 @@ namespace NApi
 
     public bool TryGetValue(out bool value)
     {
-      napi_status status = napi_get_value_bool((napi_env)Scope, Value, out sbyte result);
+      napi_status status = napi_get_value_bool((napi_env)Scope, Value, out byte result);
       value = result != 0;
       return status == napi_status.napi_ok;
     }
@@ -581,7 +581,7 @@ namespace NApi
 
     public bool HasProperty(JSValue key)
     {
-      napi_has_property((napi_env)Scope, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed();
+      napi_has_property((napi_env)Scope, (napi_value)this, (napi_value)key, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -593,13 +593,13 @@ namespace NApi
 
     public bool DeleteProperty(JSValue key)
     {
-      napi_delete_property((napi_env)Scope, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed();
+      napi_delete_property((napi_env)Scope, (napi_value)this, (napi_value)key, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
     public bool HasOwnProperty(JSValue key)
     {
-      napi_has_own_property((napi_env)Scope, (napi_value)this, (napi_value)key, out sbyte result).ThrowIfFailed();
+      napi_has_own_property((napi_env)Scope, (napi_value)this, (napi_value)key, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -610,7 +610,7 @@ namespace NApi
 
     public bool HasProperty(string name)
     {
-      napi_has_named_property((napi_env)Scope, (napi_value)this, name, out sbyte result).ThrowIfFailed();
+      napi_has_named_property((napi_env)Scope, (napi_value)this, name, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -627,7 +627,7 @@ namespace NApi
 
     public bool HasElement(int index)
     {
-      napi_has_element((napi_env)Scope, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed();
+      napi_has_element((napi_env)Scope, (napi_value)this, (uint)index, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -639,7 +639,7 @@ namespace NApi
 
     public bool DeleteElement(int index)
     {
-      napi_delete_element((napi_env)Scope, (napi_value)this, (uint)index, out sbyte result).ThrowIfFailed();
+      napi_delete_element((napi_env)Scope, (napi_value)this, (uint)index, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -710,7 +710,7 @@ namespace NApi
 
     public bool IsArray()
     {
-      napi_is_array((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_array((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -722,7 +722,7 @@ namespace NApi
 
     public bool StrictEquals(JSValue other)
     {
-      napi_strict_equals((napi_env)Scope, (napi_value)this, (napi_value)other, out sbyte result);
+      napi_strict_equals((napi_env)Scope, (napi_value)this, (napi_value)other, out byte result);
       return result != 0;
     }
 
@@ -785,7 +785,7 @@ namespace NApi
 
     public bool InstanceOf(JSValue constructor)
     {
-      napi_instanceof((napi_env)Scope, (napi_value)this, (napi_value)constructor, out sbyte result).ThrowIfFailed();
+      napi_instanceof((napi_env)Scope, (napi_value)this, (napi_value)constructor, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -883,13 +883,13 @@ namespace NApi
 
     public bool IsError()
     {
-      napi_is_error((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_error((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
     public static bool IsExceptionPending()
     {
-      napi_is_exception_pending((napi_env)JSValueScope.Current, out sbyte result).ThrowIfFailed();
+      napi_is_exception_pending((napi_env)JSValueScope.Current, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -901,7 +901,7 @@ namespace NApi
 
     public bool IsArrayBuffer()
     {
-      napi_is_arraybuffer((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_arraybuffer((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -973,7 +973,7 @@ namespace NApi
 
     public bool IsTypedArray()
     {
-      napi_is_typedarray((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_typedarray((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -1018,7 +1018,7 @@ namespace NApi
 
     public bool IsDataView()
     {
-      napi_is_dataview((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_dataview((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -1051,7 +1051,7 @@ namespace NApi
 
     public bool IsPromise()
     {
-      napi_is_promise((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_promise((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -1069,7 +1069,7 @@ namespace NApi
 
     public bool IsDate()
     {
-      napi_is_date((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_date((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -1099,14 +1099,14 @@ namespace NApi
 
     public long GetValueBigIntInt64(out bool isLossless)
     {
-      napi_get_value_bigint_int64((napi_env)Scope, (napi_value)this, out long result, out sbyte lossless).ThrowIfFailed();
+      napi_get_value_bigint_int64((napi_env)Scope, (napi_value)this, out long result, out byte lossless).ThrowIfFailed();
       isLossless = lossless != 0;
       return result;
     }
 
     public ulong GetValueBigIntUInt64(out bool isLossless)
     {
-      napi_get_value_bigint_uint64((napi_env)Scope, (napi_value)this, out ulong result, out sbyte lossless).ThrowIfFailed();
+      napi_get_value_bigint_uint64((napi_env)Scope, (napi_value)this, out ulong result, out byte lossless).ThrowIfFailed();
       isLossless = lossless != 0;
       return result;
     }
@@ -1166,7 +1166,7 @@ namespace NApi
 
     public bool IsDetachedArrayBuffer()
     {
-      napi_is_detached_arraybuffer((napi_env)Scope, (napi_value)this, out sbyte result).ThrowIfFailed();
+      napi_is_detached_arraybuffer((napi_env)Scope, (napi_value)this, out byte result).ThrowIfFailed();
       return result != 0;
     }
 
@@ -1177,7 +1177,7 @@ namespace NApi
 
     public bool CheckObjectTypeTag(ref napi_type_tag typeTag)
     {
-      napi_check_object_type_tag((napi_env)Scope, (napi_value)this, ref typeTag, out sbyte result);
+      napi_check_object_type_tag((napi_env)Scope, (napi_value)this, ref typeTag, out byte result);
       return result != 0;
     }
 
