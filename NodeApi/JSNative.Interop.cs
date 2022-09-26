@@ -7,6 +7,7 @@ namespace NodeApi;
 
 public static partial class JSNative
 {
+  // Node-API Interop definitions and functions.
   [SuppressUnmanagedCodeSecurity]
   public static unsafe class Interop
   {
