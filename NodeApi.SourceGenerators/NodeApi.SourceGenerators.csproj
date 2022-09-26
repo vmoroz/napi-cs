@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <PropertyGroup Label="PackageInfo">
-    <Title>Source Generators for NApi</Title>
+    <Title>Source Generators for Node API</Title>
     <PackageType>SourceGenerators</PackageType>
     <PackageTags>nodejs</PackageTags>
-    <Summary>Source Generators for NApi</Summary>
-    <Description>Source Generators for NApi</Description>
+    <Summary>Source Generators for Node API</Summary>
+    <Description>Source Generators for Node API</Description>
   </PropertyGroup>
 
   <ItemGroup>

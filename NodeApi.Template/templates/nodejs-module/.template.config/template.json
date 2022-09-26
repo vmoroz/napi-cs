@@ -2,7 +2,7 @@
   "$schema": "http://json.schemastore.org/template",
   "author": "EYHN",
   "classifications": [ "NodeJS" ],
-  "identity": "NApi.Template.CSharp",
+  "identity": "NodeApi.Template.CSharp",
   "name": "NodeJS Module With CSharp",
   "shortName": "nodejs"
 }

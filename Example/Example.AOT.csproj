@@ -1,18 +1,18 @@
 <Project>
   <PropertyGroup>
-    <IsNApiRepo>true</IsNApiRepo>
+    <IsNodeApiRepo>true</IsNodeApiRepo>
   </PropertyGroup>
 
-  <Import Project="../NApi.Sdk.AOT/Sdk/Sdk.props" />
+  <Import Project="../NodeApi.Sdk.AOT/Sdk/Sdk.props" />
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <BaseOutputPath>bin/aot/</BaseOutputPath>
   </PropertyGroup>
 
-  <Import Project="../NApi.Sdk.AOT/Sdk/Sdk.targets" />
+  <Import Project="../NodeApi.Sdk.AOT/Sdk/Sdk.targets" />
 </Project>

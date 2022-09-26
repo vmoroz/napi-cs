@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Label="PackageInfo">
-		<Title>NApi</Title>
+		<Title>NodeApi</Title>
 		<PackageType>MSBuildSdk</PackageType>
 		<PackageTags>nodejs</PackageTags>
 		<Summary>NodeJS Addon Api for dotnet.</Summary>

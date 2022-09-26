@@ -31,7 +31,7 @@ public enum napi_valuetype : int
   napi_bigint,
 }
 
-public enum napi_typedarray_type
+public enum napi_typedarray_type : int
 {
   napi_int8_array,
   napi_uint8_array,
@@ -46,7 +46,7 @@ public enum napi_typedarray_type
   napi_biguint64_array,
 }
 
-public enum napi_status
+public enum napi_status : int
 {
   napi_ok,
   napi_invalid_arg,

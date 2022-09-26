@@ -4,9 +4,9 @@
 
   <PropertyGroup>
     <PackageType>Template</PackageType>
-    <Title>NApi Template</Title>
+    <Title>Node API Template</Title>
     <Description>Templates for developing nodejs modules with dotnet.</Description>
-    <PackageTags>dotnet-new;templates;nodejs;napi</PackageTags>
+    <PackageTags>dotnet-new;templates;nodejs;napi;node-api</PackageTags>
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 

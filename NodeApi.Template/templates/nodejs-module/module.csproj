@@ -1,4 +1,4 @@
-<Project Sdk="NApi.Sdk.CLR/$version$">
+<Project Sdk="NodeApi.Sdk.CLR/$version$">
   <PropertyGroup>
       <TargetFramework>net6.0</TargetFramework>
       <Nullable>enable</Nullable>

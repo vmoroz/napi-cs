@@ -19,14 +19,14 @@
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">$(DefaultRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(IsNApiRepo)' != 'true'">
-    <PackageReference Include="NApi" Version="$version$"/>
-    <PackageReference Include="NApi.SourceGenerators" Version="$version$"/>
+  <ItemGroup Condition="'$(IsNodeApiRepo)' != 'true'">
+    <PackageReference Include="NodeApi" Version="$version$"/>
+    <PackageReference Include="NodeApi.SourceGenerators" Version="$version$"/>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(IsNApiRepo)' == 'true'">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\NApi\NApi.csproj"/>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\NApi.SourceGenerators\NApi.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+  <ItemGroup Condition="'$(IsNodeApiRepo)' == 'true'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\NodeApi\NodeApi.csproj"/>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\NodeApi.SourceGenerators\NodeApi.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
 </Project>

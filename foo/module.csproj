@@ -1,9 +1,9 @@
 <Project>
   <PropertyGroup>
-    <IsNApiRepo>true</IsNApiRepo>
+    <IsNodeApiRepo>true</IsNodeApiRepo>
   </PropertyGroup>
 
-  <Import Project="../NApi.Sdk.AOT/Sdk/Sdk.props" />
+  <Import Project="../NodeApi.Sdk.AOT/Sdk/Sdk.props" />
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -14,5 +14,5 @@
     <BaseOutputPath>bin/aot/</BaseOutputPath>
   </PropertyGroup>
 
-  <Import Project="../NApi.Sdk.AOT/Sdk/Sdk.targets" />
+  <Import Project="../NodeApi.Sdk.AOT/Sdk/Sdk.targets" />
 </Project>
