@@ -9,20 +9,30 @@ namespace NodeApi;
 
 public struct JSValue
 {
-  internal JSValueScope Scope { get; }
+  private JSValueScope _scope;
+  private napi_value _handle;
 
-  internal napi_value Value { get; }
+  public JSValueScope Scope => _scope;
 
-  public JSValue(JSValueScope scope, napi_value value)
+  public JSValue(JSValueScope scope, napi_value handle)
   {
-    Scope = scope;
-    Value = value;
+    _scope = scope;
+    _handle = handle;
   }
 
-  public JSValue(napi_value value)
+  public JSValue(napi_value handle)
   {
-    Scope = JSValueScope.Current ?? throw new InvalidOperationException("No current scope");
-    Value = value;
+    _scope = JSValueScope.Current ?? throw new InvalidOperationException("No current scope");
+    _handle = handle;
+  }
+
+  public napi_value GetCheckedHandle()
+  {
+    if (_scope.IsInvalid)
+    {
+      throw new InvalidOperationException("The value handle is invalid because its scope is closed");
+    }
+    return _handle;
   }
 
   public static JSValue GetUndefined()
@@ -116,13 +126,13 @@ public struct JSValue
 
   public static JSValue CreateSymbol(JSValue description)
   {
-    napi_create_symbol((napi_env)JSValueScope.Current, description.Value, out napi_value result).ThrowIfFailed();
+    napi_create_symbol((napi_env)JSValueScope.Current, (napi_value)description, out napi_value result).ThrowIfFailed();
     return result;
   }
 
   public static JSValue CreateSymbol(string description)
   {
-    napi_create_symbol((napi_env)JSValueScope.Current, CreateStringUtf16(description).Value, out napi_value result).ThrowIfFailed(); ;
+    napi_create_symbol((napi_env)JSValueScope.Current, (napi_value)CreateStringUtf16(description), out napi_value result).ThrowIfFailed(); ;
     return result;
   }
 
@@ -189,51 +199,51 @@ public struct JSValue
 
   public static JSValue CreateError(JSValue code, JSValue message)
   {
-    napi_create_error((napi_env)JSValueScope.Current, code.Value, message.Value, out napi_value result).ThrowIfFailed();
+    napi_create_error((napi_env)JSValueScope.Current, (napi_value)code, (napi_value)message, out napi_value result).ThrowIfFailed();
     return result;
   }
 
   public static JSValue CreateTypeError(JSValue code, JSValue message)
   {
-    napi_create_type_error((napi_env)JSValueScope.Current, code.Value, message.Value, out napi_value result).ThrowIfFailed();
+    napi_create_type_error((napi_env)JSValueScope.Current, (napi_value)code, (napi_value)message, out napi_value result).ThrowIfFailed();
     return result;
   }
 
   public static JSValue CreateRangeError(JSValue code, JSValue message)
   {
-    napi_create_range_error((napi_env)JSValueScope.Current, code.Value, message.Value, out napi_value result).ThrowIfFailed();
+    napi_create_range_error((napi_env)JSValueScope.Current, (napi_value)code, (napi_value)message, out napi_value result).ThrowIfFailed();
     return result;
   }
 
   public unsafe JSValueType TypeOf()
   {
-    napi_typeof((napi_env)Scope, Value, out napi_valuetype result).ThrowIfFailed();
+    napi_typeof((napi_env)Scope, (napi_value)this, out napi_valuetype result).ThrowIfFailed();
     return (JSValueType)result;
   }
 
   public bool TryGetValue(out double value)
   {
-    return napi_get_value_double((napi_env)Scope, Value, out value) == napi_status.napi_ok;
+    return napi_get_value_double((napi_env)Scope, (napi_value)this, out value) == napi_status.napi_ok;
   }
 
   public bool TryGetValue(out int value)
   {
-    return napi_get_value_int32((napi_env)Scope, Value, out value) == napi_status.napi_ok;
+    return napi_get_value_int32((napi_env)Scope, (napi_value)this, out value) == napi_status.napi_ok;
   }
 
   public bool TryGetValue(out uint value)
   {
-    return napi_get_value_uint32((napi_env)Scope, Value, out value) == napi_status.napi_ok;
+    return napi_get_value_uint32((napi_env)Scope, (napi_value)this, out value) == napi_status.napi_ok;
   }
 
   public bool TryGetValue(out long value)
   {
-    return napi_get_value_int64((napi_env)Scope, Value, out value) == napi_status.napi_ok;
+    return napi_get_value_int64((napi_env)Scope, (napi_value)this, out value) == napi_status.napi_ok;
   }
 
   public bool TryGetValue(out bool value)
   {
-    napi_status status = napi_get_value_bool((napi_env)Scope, Value, out byte result);
+    napi_status status = napi_get_value_bool((napi_env)Scope, (napi_value)this, out byte result);
     value = result != 0;
     return status == napi_status.napi_ok;
   }
@@ -243,7 +253,7 @@ public struct JSValue
     // TODO: add check that the object is still alive
     // TODO: should we check value type first?
     nuint length;
-    if (napi_get_value_string_utf16((napi_env)Scope, Value, null, 0, &length) != napi_status.napi_ok)
+    if (napi_get_value_string_utf16((napi_env)Scope, (napi_value)this, null, 0, &length) != napi_status.napi_ok)
     {
       value = string.Empty;
       return false;
@@ -252,7 +262,7 @@ public struct JSValue
     char[] buf = new char[length + 1];
     fixed (char* bufStart = &buf[0])
     {
-      napi_get_value_string_utf16((napi_env)Scope, Value, bufStart, (nuint)buf.Length, null).ThrowIfFailed();
+      napi_get_value_string_utf16((napi_env)Scope, (napi_value)this, bufStart, (nuint)buf.Length, null).ThrowIfFailed();
       value = new string(buf);
       return true;
     }
@@ -364,7 +374,7 @@ public struct JSValue
     set { SetProperty(name, value); }
   }
 
-  public static explicit operator napi_value(JSValue value) => value.Value;
+  public static explicit operator napi_value(JSValue value) => value.GetCheckedHandle();
 
   public static implicit operator JSValue(napi_value value) => new JSValue(value);
 
