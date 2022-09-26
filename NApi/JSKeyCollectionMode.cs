@@ -1,4 +1,4 @@
-﻿namespace NApi;
+﻿namespace NodeApi;
 
 public enum JSKeyCollectionMode : int
 {

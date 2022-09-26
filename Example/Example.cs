@@ -1,4 +1,4 @@
-using NApi;
+using NodeApi;
 using static System.Console;
 
 namespace Example;

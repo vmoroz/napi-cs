@@ -1,4 +1,4 @@
-﻿namespace NApi;
+﻿namespace NodeApi;
 
 public static class ExtensionMethods
 {

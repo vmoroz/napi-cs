@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NApi;
+namespace NodeApi;
 
 public class JSClassBuilder<T> where T : class
 {

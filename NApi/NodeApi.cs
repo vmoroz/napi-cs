@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace NApi;
+namespace NodeApi;
 
 public enum napi_property_attributes : int
 {

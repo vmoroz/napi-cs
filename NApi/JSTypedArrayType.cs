@@ -1,4 +1,4 @@
-﻿namespace NApi;
+﻿namespace NodeApi;
 
 // Matches to napi_typed_arraytype
 public enum JSTypedArrayType : int

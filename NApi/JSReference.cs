@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using static NApi.NodeApi;
+using static NodeApi.NodeApi;
 
-namespace NApi;
+namespace NodeApi;
 
 public class JSReference : SafeHandle
 {

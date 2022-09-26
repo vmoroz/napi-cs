@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NApi;
+namespace NodeApi;
 
 public class JSPropertyDescriptor
 {

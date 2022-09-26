@@ -1,7 +1,7 @@
 ﻿using System;
-using static NApi.NodeApi;
+using static NodeApi.NodeApi;
 
-namespace NApi;
+namespace NodeApi;
 
 public class JSCallbackArgs
 {

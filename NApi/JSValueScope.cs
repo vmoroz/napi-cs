@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace NApi;
+namespace NodeApi;
 
 public abstract class JSValueScope : SafeHandle
 {

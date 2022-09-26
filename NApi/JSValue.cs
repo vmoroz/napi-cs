@@ -3,9 +3,9 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using static NApi.NodeApi;
+using static NodeApi.NodeApi;
 
-namespace NApi;
+namespace NodeApi;
 
 public class JSValue
 {
