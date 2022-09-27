@@ -38,7 +38,9 @@ public class JSPropertyDescriptor
   public JSPropertyDescriptor(JSValue name, JSCallback? getter, JSCallback? setter, JSPropertyAttributes attributes = JSPropertyAttributes.Configurable)
   {
     if (getter == null && setter == null)
-      throw new ArgumentException($"Either `{nameof(getter)}` or `{nameof(setter)}` must be not null");
+    {
+      throw new ArgumentException($"Either `{nameof(getter)}` or `{nameof(setter)}` or both must be not null");
+    }
     Name = name;
     Getter = getter;
     Setter = setter;
