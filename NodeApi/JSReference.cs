@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 
-public class JSReference : SafeHandle
+public class JSReference : IDisposable
 {
-  public napi_ref Handle { get { return new napi_ref(handle); } }
+  private napi_env _env;
+  private napi_ref _handle;
+  private bool _isDisposed = false;
 
-  public bool IsWeak { get; }
+  public bool IsWeak { get; private set; }
 
-  public JSReference(JSValue value, bool isWeak = false) : base(IntPtr.Zero, true)
+  public JSReference(JSValue value, bool isWeak = false)
   {
-    napi_create_reference(Env, (napi_value)value, isWeak ? 0u : 1u, out napi_ref handle).ThrowIfFailed();
-    SetHandle((IntPtr)handle);
+    _env = (napi_env)value.Scope;
+    napi_create_reference(_env, (napi_value)value, isWeak ? 0u : 1u, out _handle).ThrowIfFailed();
     IsWeak = isWeak;
   }
 
@@ -21,32 +22,47 @@ public class JSReference : SafeHandle
   {
     if (!IsWeak)
     {
-      napi_reference_unref(Env, Handle, IntPtr.Zero).ThrowIfFailed();
+      napi_reference_unref(_env, _handle, IntPtr.Zero).ThrowIfFailed();
+      IsWeak = true;
     }
   }
   public void MakeStrong()
   {
     if (IsWeak)
     {
-      napi_reference_ref(Env, Handle, IntPtr.Zero).ThrowIfFailed();
+      napi_reference_ref(_env, _handle, IntPtr.Zero).ThrowIfFailed();
+      IsWeak = true;
     }
   }
 
   public JSValue? GetValue()
   {
-    napi_get_reference_value(Env, Handle, out napi_value result);
+    napi_get_reference_value(_env, _handle, out napi_value result);
     return result.IsNull ? null : result;
   }
 
-  public override bool IsInvalid => handle == IntPtr.Zero;
+  public bool IsInvalid => _isDisposed;
 
-  protected override bool ReleaseHandle()
+  public static explicit operator napi_ref(JSReference value) => value._handle;
+
+  public void Delete() => Dispose();
+
+  public void Dispose()
   {
-    napi_delete_reference(Env, Handle).ThrowIfFailed();
-    return true;
+    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    Dispose(disposing: true);
+    GC.SuppressFinalize(this);
   }
 
-  public static explicit operator napi_ref(JSReference value) => value.Handle;
-
-  private static napi_env Env => (napi_env)JSValueScope.Current;
+  protected virtual void Dispose(bool disposing)
+  {
+    if (!_isDisposed)
+    {
+      if (disposing)
+      {
+        napi_delete_reference(_env, _handle).ThrowIfFailed();
+      }
+      _isDisposed = true;
+    }
+  }
 }

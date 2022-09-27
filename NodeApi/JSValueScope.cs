@@ -20,6 +20,8 @@ public class JSValueScope : IDisposable
 
   public static JSValueScope? Current { get { return t_current; } }
 
+  public void Close() => Dispose();
+
   public void Dispose()
   {
     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
