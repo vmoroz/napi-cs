@@ -38,13 +38,12 @@ public class JSClassBuilder<T> where T : class
   {
     return Property(
       name,
-      getter != null ? args => getter((T)args.ThisArg.Unwrap()) : null,
-      setter != null ? args =>
+      getter == null ? null : args => getter((T)args.ThisArg.Unwrap()),
+      setter == null ? null : args =>
       {
         setter((T)args.ThisArg.Unwrap(), args[0]);
-        return JSValue.GetUndefined();
-      }
-    : null,
+        return JSNative.GetUndefined();
+      },
       attributes);
   }
 
@@ -59,7 +58,7 @@ public class JSClassBuilder<T> where T : class
     return Method(name, args =>
     {
       getMethod((T)args.ThisArg.Unwrap()).Invoke();
-      return JSValue.GetUndefined();
+      return JSNative.GetUndefined();
     }, attributes);
   }
 
@@ -68,7 +67,7 @@ public class JSClassBuilder<T> where T : class
     return Method(name, args =>
     {
       getMethod((T)args.ThisArg.Unwrap()).Invoke(args);
-      return JSValue.GetUndefined();
+      return JSNative.GetUndefined();
     }, attributes);
   }
 

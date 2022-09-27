@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
-using System.Reflection.Metadata;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using static NodeApi.JSNative.Interop;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace NodeApi;
 
@@ -128,7 +126,7 @@ public static partial class JSNative
   public static unsafe JSValue CreateFunction(
     ReadOnlyMemory<byte> utf8Name,
     delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> callback,
-    void* data)
+    IntPtr data)
   {
     napi_create_function(Env, (byte*)utf8Name.Pin().Pointer, (nuint)utf8Name.Length,
       callback, data, out napi_value result).ThrowIfFailed();
@@ -138,7 +136,7 @@ public static partial class JSNative
   public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, JSCallback callback)
   {
     GCHandle callbackHandle = GCHandle.Alloc(callback);
-    JSValue func = CreateFunction(utf8Name, &InvokeJSCallback, (void*)callbackHandle.AddrOfPinnedObject());
+    JSValue func = CreateFunction(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle);
     func.AddHandleFinalizer((IntPtr)callbackHandle);
     return func;
   }
@@ -226,7 +224,7 @@ public static partial class JSNative
   public static byte[] GetValueStringLatin1(this JSValue value)
   {
     int length = GetValueStringLatin1(value, Span<byte>.Empty);
-    byte[] result = new byte[length];
+    byte[] result = new byte[length + 1];
     GetValueStringLatin1(value, new Span<byte>(result));
     return result;
   }
@@ -248,7 +246,7 @@ public static partial class JSNative
   public static byte[] GetValueStringUtf8(this JSValue value)
   {
     int length = GetValueStringUtf8(value, Span<byte>.Empty);
-    byte[] result = new byte[length];
+    byte[] result = new byte[length + 1];
     GetValueStringUtf8(value, new Span<byte>(result));
     return result;
   }
@@ -270,9 +268,9 @@ public static partial class JSNative
   public static string GetValueStringUtf16(this JSValue value)
   {
     int length = GetValueStringUtf16(value, Span<char>.Empty);
-    char[] result = new char[length];
+    char[] result = new char[length + 1];
     GetValueStringUtf16(value, new Span<char>(result));
-    return new string(result);
+    return new string(result, 0, length);
   }
 
   public static JSValue CoerceToBoolean(this JSValue value)
@@ -605,11 +603,10 @@ public static partial class JSNative
     napi_get_and_clear_last_exception(Env, out napi_value result).ThrowIfFailed();
     return result;
   }
-#if false
 
-  public bool IsArrayBuffer()
+  public static bool IsArrayBuffer(this JSValue thisValue)
   {
-    napi_is_arraybuffer(Env, (napi_value)value, out byte result).ThrowIfFailed();
+    napi_is_arraybuffer(Env, (napi_value)thisValue, out byte result).ThrowIfFailed();
     return result != 0;
   }
 
@@ -618,46 +615,6 @@ public static partial class JSNative
     napi_create_arraybuffer(Env, (nuint)data.Length, out void* buffer, out napi_value result).ThrowIfFailed();
     data.CopyTo(new Span<byte>(buffer, data.Length));
     return result;
-  }
-
-  private class PinnedReadOnlyMemory : IDisposable
-  {
-    private bool _disposedValue = false;
-    private object? _owner;
-    private ReadOnlyMemory<byte> _memory;
-    private MemoryHandle _memoryHandle;
-
-    public PinnedReadOnlyMemory(object? owner, ReadOnlyMemory<byte> memory)
-    {
-      _owner = owner;
-      _memory = memory;
-      _memoryHandle = _memory.Pin();
-    }
-
-    public unsafe void* Pointer => _memoryHandle.Pointer;
-
-    public int Length => _memory.Length;
-
-    protected virtual void Dispose(bool disposing)
-    {
-      if (!_disposedValue)
-      {
-        if (disposing)
-        {
-          _memoryHandle.Dispose();
-        }
-
-        _owner = null;
-        _disposedValue = true;
-      }
-    }
-
-    public void Dispose()
-    {
-      // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      Dispose(disposing: true);
-      GC.SuppressFinalize(this);
-    }
   }
 
   public static unsafe JSValue CreateExternalArrayBuffer(object external, ReadOnlyMemory<byte> memory)
@@ -673,15 +630,15 @@ public static partial class JSNative
     return result;
   }
 
-  public unsafe Span<byte> GetArrayBufferInfo()
+  public static unsafe Span<byte> GetArrayBufferInfo(this JSValue thisValue)
   {
-    napi_get_arraybuffer_info(Env, (napi_value)value, out void* data, out nuint length).ThrowIfFailed();
+    napi_get_arraybuffer_info(Env, (napi_value)thisValue, out void* data, out nuint length).ThrowIfFailed();
     return new Span<byte>(data, (int)length);
   }
 
-  public bool IsTypedArray()
+  public static bool IsTypedArray(this JSValue thisValue)
   {
-    napi_is_typedarray(Env, (napi_value)value, out byte result).ThrowIfFailed();
+    napi_is_typedarray(Env, (napi_value)thisValue, out byte result).ThrowIfFailed();
     return result != 0;
   }
 
@@ -689,7 +646,7 @@ public static partial class JSNative
   {
     napi_create_typedarray(
       Env,
-      (napi_typedarray_type)(int)type,
+      (napi_typedarray_type)type,
       (nuint)length,
       (napi_value)arrayBuffer,
       (nuint)byteOffset,
@@ -697,7 +654,8 @@ public static partial class JSNative
     return result;
   }
 
-  public unsafe void GetTypedArrayInfo(
+  public static unsafe void GetTypedArrayInfo(
+    this JSValue thisValue,
     out JSTypedArrayType type,
     out int length,
     out void* data,
@@ -706,7 +664,7 @@ public static partial class JSNative
   {
     napi_get_typedarray_info(
       Env,
-      (napi_value)value,
+      (napi_value)thisValue,
       out napi_typedarray_type type_,
       out nuint length_,
       out data,
@@ -724,17 +682,17 @@ public static partial class JSNative
     return result;
   }
 
-  public bool IsDataView()
+  public static bool IsDataView(this JSValue thisValue)
   {
-    napi_is_dataview(Env, (napi_value)value, out byte result).ThrowIfFailed();
+    napi_is_dataview(Env, (napi_value)thisValue, out byte result).ThrowIfFailed();
     return result != 0;
   }
 
-  public unsafe void GetDataViewInfo(out ReadOnlySpan<byte> viewSpan, out JSValue arrayBuffer, out int byteOffset)
+  public static unsafe void GetDataViewInfo(this JSValue thisValue, out ReadOnlySpan<byte> viewSpan, out JSValue arrayBuffer, out int byteOffset)
   {
     napi_get_dataview_info(
       Env,
-      (napi_value)value,
+      (napi_value)thisValue,
       out nuint byteLength,
       out void* data,
       out napi_value arrayBuffer_,
@@ -757,15 +715,15 @@ public static partial class JSNative
     return promise;
   }
 
-  public bool IsPromise()
+  public static bool IsPromise(this JSValue thisValue)
   {
-    napi_is_promise(Env, (napi_value)value, out byte result).ThrowIfFailed();
+    napi_is_promise(Env, (napi_value)thisValue, out byte result).ThrowIfFailed();
     return result != 0;
   }
 
-  public JSValue RunScript()
+  public static JSValue RunScript(this JSValue thisValue)
   {
-    napi_run_script(Env, (napi_value)value, out napi_value result).ThrowIfFailed();
+    napi_run_script(Env, (napi_value)thisValue, out napi_value result).ThrowIfFailed();
     return result;
   }
 
@@ -775,15 +733,15 @@ public static partial class JSNative
     return result;
   }
 
-  public bool IsDate()
+  public static bool IsDate(this JSValue thisValue)
   {
-    napi_is_date(Env, (napi_value)value, out byte result).ThrowIfFailed();
+    napi_is_date(Env, (napi_value)thisValue, out byte result).ThrowIfFailed();
     return result != 0;
   }
 
-  public double GetDateValue()
+  public static double GetDateValue(this JSValue thisValue)
   {
-    napi_get_date_value(Env, (napi_value)value, out double result).ThrowIfFailed();
+    napi_get_date_value(Env, (napi_value)thisValue, out double result).ThrowIfFailed();
     return result;
   }
 
@@ -805,36 +763,36 @@ public static partial class JSNative
     return result;
   }
 
-  public long GetValueBigIntInt64(out bool isLossless)
+  public static long GetValueBigIntInt64(this JSValue thisValue, out bool isLossless)
   {
-    napi_get_value_bigint_int64(Env, (napi_value)value, out long result, out byte lossless).ThrowIfFailed();
+    napi_get_value_bigint_int64(Env, (napi_value)thisValue, out long result, out byte lossless).ThrowIfFailed();
     isLossless = lossless != 0;
     return result;
   }
 
-  public ulong GetValueBigIntUInt64(out bool isLossless)
+  public static ulong GetValueBigIntUInt64(this JSValue thisValue, out bool isLossless)
   {
-    napi_get_value_bigint_uint64(Env, (napi_value)value, out ulong result, out byte lossless).ThrowIfFailed();
+    napi_get_value_bigint_uint64(Env, (napi_value)thisValue, out ulong result, out byte lossless).ThrowIfFailed();
     isLossless = lossless != 0;
     return result;
   }
 
-  public unsafe ulong[] GetValueBigIntWords(out int signBit)
+  public static unsafe ulong[] GetValueBigIntWords(this JSValue thisValue, out int signBit)
   {
-    napi_get_value_bigint_words(Env, (napi_value)value, out signBit, out nuint wordCount, null).ThrowIfFailed();
+    napi_get_value_bigint_words(Env, (napi_value)thisValue, out signBit, out nuint wordCount, null).ThrowIfFailed();
     ulong[] words = new ulong[wordCount];
     fixed (ulong* wordsPtr = &words[0])
     {
-      napi_get_value_bigint_words(Env, (napi_value)value, out signBit, out wordCount, wordsPtr).ThrowIfFailed();
+      napi_get_value_bigint_words(Env, (napi_value)thisValue, out signBit, out wordCount, wordsPtr).ThrowIfFailed();
     }
     return words;
   }
 
-  public JSValue GetAllPropertyNames(JSKeyCollectionMode mode, JSKeyFilter filter, JSKeyConversion conversion)
+  public static JSValue GetAllPropertyNames(this JSValue thisValue, JSKeyCollectionMode mode, JSKeyFilter filter, JSKeyConversion conversion)
   {
     napi_get_all_property_names(
       Env,
-      (napi_value)value,
+      (napi_value)thisValue,
       (napi_key_collection_mode)mode,
       (napi_key_filter)filter,
       (napi_key_conversion)conversion,
@@ -867,17 +825,16 @@ public static partial class JSNative
     return (data != IntPtr.Zero) ? GCHandle.FromIntPtr(data).Target : null;
   }
 
-  public void DetachArrayBuffer()
+  public static void DetachArrayBuffer(this JSValue thisValue)
   {
-    napi_detach_arraybuffer(Env, (napi_value)this).ThrowIfFailed();
+    napi_detach_arraybuffer(Env, (napi_value)thisValue).ThrowIfFailed();
   }
 
-  public bool IsDetachedArrayBuffer()
+  public static bool IsDetachedArrayBuffer(this JSValue thisValue)
   {
-    napi_is_detached_arraybuffer(Env, (napi_value)value, out byte result).ThrowIfFailed();
+    napi_is_detached_arraybuffer(Env, (napi_value)thisValue, out byte result).ThrowIfFailed();
     return result != 0;
   }
-#endif
 
   public static void SetObjectTypeTag(this JSValue thisValue, ref napi_type_tag typeTag)
   {
@@ -971,7 +928,6 @@ public static partial class JSNative
     return (napi_value)desc.Setter!.Invoke(args);
   }
 
-
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
   private static unsafe void FinalizeHandle(IntPtr env, IntPtr data, IntPtr hint)
   {
@@ -1014,4 +970,44 @@ public static partial class JSNative
   }
 
   private unsafe delegate void UseUnmanagedDescriptors(nuint count, napi_property_descriptor* descriptors);
+
+  private class PinnedReadOnlyMemory : IDisposable
+  {
+    private bool _disposedValue = false;
+    private object? _owner;
+    private ReadOnlyMemory<byte> _memory;
+    private MemoryHandle _memoryHandle;
+
+    public PinnedReadOnlyMemory(object? owner, ReadOnlyMemory<byte> memory)
+    {
+      _owner = owner;
+      _memory = memory;
+      _memoryHandle = _memory.Pin();
+    }
+
+    public unsafe void* Pointer => _memoryHandle.Pointer;
+
+    public int Length => _memory.Length;
+
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!_disposedValue)
+      {
+        if (disposing)
+        {
+          _memoryHandle.Dispose();
+        }
+
+        _owner = null;
+        _disposedValue = true;
+      }
+    }
+
+    public void Dispose()
+    {
+      // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+      Dispose(disposing: true);
+      GC.SuppressFinalize(this);
+    }
+  }
 }
