@@ -28,14 +28,17 @@
           AfterTargets="PublishNodeAddon">
     <PropertyGroup>
         <JsEntryPoint>
-module.exports = require(`./$([System.IO.Path]::GetRelativePath('$(OutputPath)', '$(NativeOutputPath)$(TargetName).node'))`)
+module.exports = require(`./$([MSBuild]::MakeRelative('$(OutputPath)', '$(NativeOutputPath)$(TargetName).node'))`)
         </JsEntryPoint>
+        <JsEntryPointFixedPath>
+$([System.Text.RegularExpressions.Regex]::Replace("$(JsEntryPoint)", "\\", "/", "System.Text.RegularExpressions.RegexOptions.ECMAScript"))
+        </JsEntryPointFixedPath>
       </PropertyGroup>
 
       <WriteLinesToFile
         File="$(OutputPath)$(AssemblyName).js"
         Overwrite="true"
-        Lines="$(JsEntryPoint)" />
+        Lines="$(JsEntryPointFixedPath)" />
   </Target>
 
 </Project>
