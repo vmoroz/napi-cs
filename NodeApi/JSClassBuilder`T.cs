@@ -84,6 +84,6 @@ public class JSClassBuilder<T> where T : class
 
   public JSValue ToJSValue()
   {
-    return JSValue.DefineClass(ClassName, args => args.ThisArg.Wrap(Constructor(args)), _properties.ToArray());
+    return JSNative.DefineClass(ClassName, args => args.ThisArg.Wrap(Constructor(args)), _properties.ToArray());
   }
 }

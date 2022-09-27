@@ -19,7 +19,7 @@ public class JSPropertyDescriptor
   }
 
   public JSPropertyDescriptor(string name, JSValue value, JSPropertyAttributes attributes = JSPropertyAttributes.DefaultProperty)
-    : this(JSValue.CreateStringUtf16(name), value, attributes)
+    : this(JSNative.CreateStringUtf16(name), value, attributes)
   {
   }
 
@@ -31,7 +31,7 @@ public class JSPropertyDescriptor
   }
 
   public JSPropertyDescriptor(string name, JSCallback method, JSPropertyAttributes attributes = JSPropertyAttributes.DefaultMethod)
-    : this(JSValue.CreateStringUtf16(name), method, attributes)
+    : this(JSNative.CreateStringUtf16(name), method, attributes)
   {
   }
 
@@ -46,7 +46,7 @@ public class JSPropertyDescriptor
   }
 
   public JSPropertyDescriptor(string name, JSCallback? getter, JSCallback? setter, JSPropertyAttributes attributes = JSPropertyAttributes.Configurable)
-    : this(JSValue.CreateStringUtf16(name), getter, setter, attributes)
+    : this(JSNative.CreateStringUtf16(name), getter, setter, attributes)
   {
   }
 }

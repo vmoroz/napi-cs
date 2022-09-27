@@ -101,45 +101,10 @@ public struct JSValue
     return result;
   }
 
-  public static unsafe JSValue CreateStringLatin1(ReadOnlyMemory<byte> value)
-  {
-    napi_create_string_latin1((napi_env)JSValueScope.Current, value.Pin().Pointer, (nuint)value.Length, out napi_value result).ThrowIfFailed();
-    return result;
-  }
-
-  public static unsafe JSValue CreateStringUtf8(ReadOnlyMemory<byte> value)
-  {
-    napi_create_string_utf8((napi_env)JSValueScope.Current, value.Pin().Pointer, (nuint)value.Length, out napi_value result).ThrowIfFailed();
-    return result;
-  }
-
-  public static unsafe JSValue CreateStringUtf16(ReadOnlyMemory<char> value)
-  {
-    napi_create_string_utf16((napi_env)JSValueScope.Current, value.Pin().Pointer, (nuint)value.Length, out napi_value result).ThrowIfFailed();
-    return result;
-  }
-
-  public static JSValue CreateStringUtf16(string value)
-  {
-    return CreateStringUtf16(value.AsMemory());
-  }
 
   public static JSValue CreateSymbol(JSValue description)
   {
     napi_create_symbol((napi_env)JSValueScope.Current, (napi_value)description, out napi_value result).ThrowIfFailed();
-    return result;
-  }
-
-  public static JSValue CreateSymbol(string description)
-  {
-    napi_create_symbol((napi_env)JSValueScope.Current, (napi_value)CreateStringUtf16(description), out napi_value result).ThrowIfFailed(); ;
-    return result;
-  }
-
-  public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name,
-    delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> callback, IntPtr data)
-  {
-    napi_create_function((napi_env)JSValueScope.Current, utf8Name.Pin().Pointer, (nuint)utf8Name.Length, callback, data, out napi_value result).ThrowIfFailed();
     return result;
   }
 
@@ -182,19 +147,6 @@ public struct JSValue
     {
       napi_add_finalizer((napi_env)Scope, (napi_value)this, handle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed();
     }
-  }
-
-  public static unsafe JSValue CreateFunction(ReadOnlyMemory<byte> utf8Name, JSCallback callback)
-  {
-    GCHandle callbackHandle = GCHandle.Alloc(callback);
-    JSValue func = CreateFunction(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle);
-    func.AddHandleFinalizer((IntPtr)callbackHandle);
-    return func;
-  }
-
-  public static JSValue CreateFunction(string name, JSCallback callback)
-  {
-    return CreateFunction(Encoding.UTF8.GetBytes(name), callback);
   }
 
   public static JSValue CreateError(JSValue code, JSValue message)
@@ -248,28 +200,6 @@ public struct JSValue
     return status == napi_status.napi_ok;
   }
 
-  public unsafe bool TryGetValue(out string value)
-  {
-    // TODO: add check that the object is still alive
-    // TODO: should we check value type first?
-    nuint length;
-    if (napi_get_value_string_utf16((napi_env)Scope, (napi_value)this, null, 0, &length) != napi_status.napi_ok)
-    {
-      value = string.Empty;
-      return false;
-    }
-
-    char[] buf = new char[length + 1];
-    fixed (char* bufStart = &buf[0])
-    {
-      napi_get_value_string_utf16((napi_env)Scope, (napi_value)this, bufStart, (nuint)buf.Length, null).ThrowIfFailed();
-      value = new string(buf);
-      return true;
-    }
-  }
-
-  //TODO: add more string functions
-
   public static implicit operator JSValue(bool value) => GetBoolean(value);
   public static implicit operator JSValue(sbyte value) => CreateNumber(value);
   public static implicit operator JSValue(byte value) => CreateNumber(value);
@@ -281,8 +211,8 @@ public struct JSValue
   public static implicit operator JSValue(ulong value) => CreateNumber(value);
   public static implicit operator JSValue(float value) => CreateNumber(value);
   public static implicit operator JSValue(double value) => CreateNumber(value);
-  public static implicit operator JSValue(string value) => CreateStringUtf16(value);
-  public static implicit operator JSValue(JSCallback callback) => CreateFunction("Unknown", callback);
+  public static implicit operator JSValue(string value) => JSNative.CreateStringUtf16(value);
+  public static implicit operator JSValue(JSCallback callback) => JSNative.CreateFunction("Unknown", callback);
 
   public static explicit operator bool(JSValue value)
   {
@@ -363,15 +293,19 @@ public struct JSValue
 
   public static explicit operator string(JSValue value)
   {
-    if (!value.TryGetValue(out string result))
-      throw new InvalidOperationException("Cannot get int value");
-    return result;
+    return value.GetValueStringUtf16();
   }
 
   public JSValue this[string name]
   {
     get { return GetProperty(name); }
     set { SetProperty(name, value); }
+  }
+
+  public JSValue this[int index]
+  {
+    get { return GetElement(index); }
+    set { SetElement(index, value); }
   }
 
   public static explicit operator napi_value(JSValue value) => value.GetCheckedHandle();
@@ -447,23 +381,6 @@ public struct JSValue
   {
     napi_has_own_property((napi_env)Scope, (napi_value)this, (napi_value)key, out byte result).ThrowIfFailed();
     return result != 0;
-  }
-
-  public void SetProperty(string name, JSValue value)
-  {
-    napi_set_named_property((napi_env)Scope, (napi_value)this, name, (napi_value)value).ThrowIfFailed();
-  }
-
-  public bool HasProperty(string name)
-  {
-    napi_has_named_property((napi_env)Scope, (napi_value)this, name, out byte result).ThrowIfFailed();
-    return result != 0;
-  }
-
-  public JSValue GetProperty(string name)
-  {
-    napi_get_named_property((napi_env)Scope, (napi_value)this, name, out napi_value result).ThrowIfFailed();
-    return result;
   }
 
   public void SetElement(int index, JSValue value)
@@ -636,55 +553,6 @@ public struct JSValue
     return result != 0;
   }
 
-  public static unsafe JSValue DefineClass(
-    ReadOnlyMemory<byte> utf8Name,
-    delegate* unmanaged[Cdecl]<napi_env, napi_callback_info, napi_value> callback,
-    IntPtr data,
-    nuint count,
-    napi_property_descriptor* descriptors)
-  {
-    napi_define_class((napi_env)JSValueScope.Current, utf8Name.Pin().Pointer, (nuint)utf8Name.Length,
-      callback, data, count, descriptors, out napi_value result).ThrowIfFailed();
-    return result;
-  }
-
-  public static unsafe JSValue DefineClass(ReadOnlyMemory<byte> utf8Name, JSCallback callback, params JSPropertyDescriptor[] descriptors)
-  {
-    GCHandle callbackHandle = GCHandle.Alloc(callback);
-    JSValue? func = null;
-    IntPtr[] handles = ToUnmanagedPropertyDescriptors(descriptors, (count, descriptorsPtr) =>
-    {
-      func = DefineClass(utf8Name, &InvokeJSCallback, (IntPtr)callbackHandle, count, descriptorsPtr);
-    });
-    Array.ForEach(handles, handle => func!.Value.AddHandleFinalizer(handle));
-    return func!.Value;
-  }
-
-  public static unsafe JSValue DefineClass(string name, JSCallback callback, params JSPropertyDescriptor[] descriptors)
-  {
-    return DefineClass(Encoding.UTF8.GetBytes(name), callback, descriptors);
-  }
-
-  public unsafe JSValue Wrap(object value)
-  {
-    GCHandle valueHandle = GCHandle.Alloc(value);
-    napi_wrap((napi_env)Scope, (napi_value)this, (IntPtr)valueHandle, &FinalizeHandle, IntPtr.Zero, null).ThrowIfFailed();
-    return this;
-  }
-
-  public object Unwrap()
-  {
-    napi_unwrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed();
-    GCHandle handle = GCHandle.FromIntPtr(result);
-    return handle.Target!;
-  }
-
-  public object RemoveWrap()
-  {
-    napi_remove_wrap((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed();
-    return GCHandle.FromIntPtr(result).Target!;
-  }
-
   public static unsafe JSValue CreateExternal(object value)
   {
     GCHandle valueHandle = GCHandle.Alloc(value);
@@ -696,16 +564,6 @@ public struct JSValue
   {
     napi_get_value_external((napi_env)Scope, (napi_value)this, out IntPtr result).ThrowIfFailed();
     return GCHandle.FromIntPtr(result).Target!;
-  }
-
-  public JSReference CreateReference()
-  {
-    return new JSReference(Scope.Environment, this);
-  }
-
-  public JSReference CreateWeakReference()
-  {
-    return new JSReference(Scope.Environment, this, isWeak: true);
   }
 
   public void Throw()
