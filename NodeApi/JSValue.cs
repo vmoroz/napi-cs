@@ -65,6 +65,12 @@ public struct JSValue
   public static explicit operator double(JSValue value) => value.GetValueDouble();
   public static explicit operator string(JSValue value) => value.GetValueStringUtf16();
 
+  public JSValue this[JSValue name]
+  {
+    get { return this.GetProperty(name); }
+    set { this.SetProperty(name, value); }
+  }
+
   public JSValue this[string name]
   {
     get { return this.GetProperty(name); }

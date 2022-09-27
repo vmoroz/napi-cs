@@ -894,17 +894,16 @@ public static partial class JSNative
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
   private static unsafe napi_value InvokeJSCallback(napi_env env, napi_callback_info callbackInfo)
   {
-    using var scope = new JSEscapableValueScope(new JSEnvironment(env));
+    using var scope = new JSRootValueScope(env);
     JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
     JSCallback callback = (JSCallback)GCHandle.FromIntPtr(args.Data).Target!;
-    JSValue result = callback(args);
-    return (napi_value)scope.Escape(result);
+    return (napi_value)callback(args);
   }
 
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
   private static unsafe napi_value InvokeJSMethod(napi_env env, napi_callback_info callbackInfo)
   {
-    using JSRootValueScope scope = new(new JSEnvironment(env));
+    using var scope = new JSRootValueScope(env);
     JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
     JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
     return (napi_value)desc.Method!.Invoke(args);
@@ -913,7 +912,7 @@ public static partial class JSNative
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
   private static unsafe napi_value InvokeJSGetter(napi_env env, napi_callback_info callbackInfo)
   {
-    using JSRootValueScope scope = new(new JSEnvironment(env));
+    using var scope = new JSRootValueScope(env);
     JSCallbackArgs args = new JSCallbackArgs(scope, callbackInfo);
     JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
     return (napi_value)desc.Getter!.Invoke(args);
@@ -922,7 +921,7 @@ public static partial class JSNative
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
   private static unsafe napi_value InvokeJSSetter(napi_env env, napi_callback_info callbackInfo)
   {
-    using JSRootValueScope scope = new(new JSEnvironment(env));
+    using var scope = new JSRootValueScope(env);
     JSCallbackArgs args = new(scope, callbackInfo);
     JSPropertyDescriptor desc = (JSPropertyDescriptor)GCHandle.FromIntPtr(args.Data).Target!;
     return (napi_value)desc.Setter!.Invoke(args);

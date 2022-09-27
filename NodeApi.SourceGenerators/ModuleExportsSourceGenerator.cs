@@ -36,13 +36,13 @@ public class ModuleExports_AutoGen
       _initialized = true;
     }
 
-    using JSRootValueScope scope = new(new JSEnvironment(env));
-    var exports_ = new JSValue(scope, exports);
+    using var scope = new JSRootValueScope(env);
+    var exportsValue = new JSValue(scope, exports);
 ");
     foreach (var method in receiver.MethodList)
     {
       var methodName = method.ContainingType.ToDisplayString() + '.' + method.Name;
-      source.Append($"{methodName}(exports_);");
+      source.Append($"{methodName}(exportsValue);");
     }
 
     source.Append(

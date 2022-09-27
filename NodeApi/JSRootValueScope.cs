@@ -1,10 +1,11 @@
 ﻿using System;
+using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 
 public sealed class JSRootValueScope : JSValueScope
 {
-  public JSRootValueScope(JSEnvironment env) : base(env)
+  public JSRootValueScope(napi_env env) : base(env)
   {
     SetHandle((IntPtr)1);
   }
