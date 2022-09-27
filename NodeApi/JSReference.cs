@@ -38,7 +38,7 @@ public class JSReference : IDisposable
   public JSValue? GetValue()
   {
     napi_get_reference_value(_env, _handle, out napi_value result);
-    return result.IsNull ? null : result;
+    return result;
   }
 
   public bool IsInvalid => _isDisposed;

@@ -15,68 +15,13 @@ public static partial class JSNative
     // Specialized pointer types
     //===========================================================================
 
-    public struct napi_env
-    {
-      private IntPtr _handle;
-
-      public napi_env(IntPtr handle) { _handle = handle; }
-
-      public static explicit operator IntPtr(napi_env env) => env._handle;
-      public static explicit operator napi_env(IntPtr handle) => new napi_env(handle);
-    }
-
-    public struct napi_value
-    {
-      public IntPtr Handle { get; init; } = IntPtr.Zero;
-
-      public napi_value() { }
-
-      public bool IsNull => Handle == IntPtr.Zero;
-
-      public static implicit operator napi_value(IntPtr value) => new napi_value { Handle = value };
-
-      public static readonly napi_value Null = new napi_value { Handle = IntPtr.Zero };
-    }
-
-    public struct napi_ref
-    {
-      private IntPtr _handle;
-
-      public napi_ref(IntPtr handle) { _handle = handle; }
-
-      public static explicit operator IntPtr(napi_ref reference) => reference._handle;
-      public static explicit operator napi_ref(IntPtr handle) => new napi_ref(handle);
-    }
-
-    public struct napi_handle_scope
-    {
-      private IntPtr _handle;
-
-      public napi_handle_scope(IntPtr handle) { _handle = handle; }
-
-      public static explicit operator IntPtr(napi_handle_scope scope) => scope._handle;
-      public static explicit operator napi_handle_scope(IntPtr handle) => new napi_handle_scope(handle);
-    }
-
-    public struct napi_escapable_handle_scope
-    {
-      private IntPtr _handle;
-
-      public napi_escapable_handle_scope(IntPtr handle) { _handle = handle; }
-
-      public static explicit operator IntPtr(napi_escapable_handle_scope scope) => scope._handle;
-      public static explicit operator napi_escapable_handle_scope(IntPtr handle) => new napi_escapable_handle_scope(handle);
-    }
-
-    public struct napi_callback_info
-    {
-      public IntPtr Handle { get; }
-    }
-
-    public struct napi_deferred
-    {
-      public IntPtr Handle { get; }
-    }
+    public record struct napi_env(IntPtr Handle);
+    public record struct napi_value(IntPtr Handle);
+    public record struct napi_ref(IntPtr Handle);
+    public record struct napi_handle_scope(IntPtr Handle);
+    public record struct napi_escapable_handle_scope(IntPtr Handle);
+    public record struct napi_callback_info(IntPtr Handle);
+    public record struct napi_deferred(IntPtr Handle);
 
     //===========================================================================
     // Enum types

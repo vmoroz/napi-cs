@@ -953,7 +953,7 @@ public static partial class JSNative
       descriptorPtr->method = descriptor.Method != null ? &InvokeJSMethod : null;
       descriptorPtr->getter = descriptor.Getter != null ? &InvokeJSGetter : null;
       descriptorPtr->setter = descriptor.Setter != null ? &InvokeJSSetter : null;
-      descriptorPtr->value = descriptor.Value != null ? (napi_value)descriptor.Value : napi_value.Null;
+      descriptorPtr->value = (napi_value)descriptor.Value;
       descriptorPtr->attributes = (napi_property_attributes)descriptor.Attributes;
       if (descriptor.Method != null || descriptor.Getter != null || descriptor.Setter != null)
       {
