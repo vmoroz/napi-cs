@@ -1,21 +1,23 @@
-using System;
 using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 
 public sealed class JSSimpleValueScope : JSValueScope
 {
-  public napi_handle_scope Handle => (napi_handle_scope)handle;
+  private napi_handle_scope _handleScope;
 
   public JSSimpleValueScope(napi_env env) : base(env)
   {
-    napi_open_handle_scope(env, out napi_handle_scope scope).ThrowIfFailed();
-    SetHandle((IntPtr)scope);
+    napi_open_handle_scope(env, out napi_handle_scope handleScope).ThrowIfFailed();
+    _handleScope = handleScope;
   }
 
-  protected override bool ReleaseHandle()
+  protected override void Dispose(bool disposing)
   {
-    napi_close_handle_scope((napi_env)this, Handle).ThrowIfFailed();
-    return true;
+    if (disposing && !IsInvalid)
+    {
+      napi_close_handle_scope((napi_env)this, _handleScope).ThrowIfFailed();
+    }
+    base.Dispose(disposing);
   }
 }

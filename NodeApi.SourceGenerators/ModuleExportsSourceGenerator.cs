@@ -36,7 +36,7 @@ public class ModuleExports_AutoGen
       _initialized = true;
     }
 
-    using var scope = new JSRootValueScope(env);
+    using var scope = new JSValueScope(env);
     var exportsValue = new JSValue(scope, exports);
 ");
     foreach (var method in receiver.MethodList)

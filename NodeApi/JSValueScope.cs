@@ -1,17 +1,17 @@
 using System;
-using System.Runtime.InteropServices;
 using static NodeApi.JSNative.Interop;
 
 namespace NodeApi;
 
-public abstract class JSValueScope : SafeHandle
+public class JSValueScope : IDisposable
 {
   private napi_env _env;
+  private bool _isDisposed = false;
   [ThreadStatic] private static JSValueScope? t_current = null;
 
   public JSValueScope? ParentScope { get; }
 
-   protected JSValueScope(napi_env env) : base(IntPtr.Zero, true)
+  public JSValueScope(napi_env env)
   {
     _env = env;
     ParentScope = t_current;
@@ -20,13 +20,14 @@ public abstract class JSValueScope : SafeHandle
 
   public static JSValueScope? Current { get { return t_current; } }
 
-  public void EnsureIsValid()
+  public void Dispose()
   {
-    if (IsInvalid)
-      throw new JSException("Out of scope!");
+    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    Dispose(disposing: true);
+    GC.SuppressFinalize(this);
   }
 
-  public override bool IsInvalid => handle == IntPtr.Zero;
+  public bool IsInvalid => _isDisposed;
 
   public static explicit operator napi_env(JSValueScope? scope)
   {
@@ -34,5 +35,13 @@ public abstract class JSValueScope : SafeHandle
       return scope._env;
     else
       throw new JSException("Out of scope!");
+  }
+
+  protected virtual void Dispose(bool disposing)
+  {
+    if (!_isDisposed)
+    {
+      _isDisposed = true;
+    }
   }
 }
